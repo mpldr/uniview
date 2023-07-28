@@ -1,0 +1,27 @@
+directive @hasJoined on FIELD_DEFINITION
+
+enum eventType {
+	JOINED
+	LEFT
+	PLAY
+	PAUSE
+	JUMP
+}
+
+input EventSubmission {
+	action: eventType!
+	timestamp: Int
+}
+
+type Event {
+action: eventType!
+	timestamp: Int
+}
+
+type Mutation {
+	postEvent(event: EventSubmission!): Boolean @hasJoined
+}
+
+type Subscription {
+	joinRoom(room: ID!): Event!
+}
