@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 
 	"git.sr.ht/~poldi1405/glog"
 )
@@ -13,8 +14,8 @@ func main() {
 	defer glog.PanicHandler()
 
 	glog.Infof("starting uniview version %s", Version)
-	if os.Args[0] == "univiewd" {
-		// TODO: start server
+	if filepath.Base(os.Args[0]) == "univiewd" {
+		glog.Debug("starting in server mode")
 		err := startServer()
 		if err != nil {
 			glog.Errorf("failed to start server: %v", err)
