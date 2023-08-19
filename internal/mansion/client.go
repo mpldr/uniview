@@ -21,11 +21,12 @@ func newClient(parent context.Context, feed protocol.UniView_RoomServer) *client
 	return c
 }
 
-func (c *client) Send(ev *protocol.RoomEvent) {
+func (c *client) Send(ev *protocol.RoomEvent) error {
 	err := c.feed.Send(ev)
 	if err != nil {
 		c.cancel()
 	}
+	return err
 }
 
 func (c *client) Dead() bool {

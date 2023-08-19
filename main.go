@@ -24,6 +24,10 @@ func main() {
 		glog.Debug("server has shut down")
 		return
 	}
-	// TODO: start client
-	os.Exit(0)
+
+	err := startClient()
+	if err != nil {
+		glog.Errorf("failed to start server: %v", err)
+		os.Exit(1)
+	}
 }

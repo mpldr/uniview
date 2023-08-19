@@ -3,7 +3,7 @@ syntax = "proto3";
 package protocol;
 option go_package = "git.sr.ht/~mpldr/uniview/protocol";
 
-import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 service UniView {
 	rpc Room(stream RoomEvent) returns (stream RoomEvent);
@@ -32,9 +32,9 @@ message RoomJoin {
 
 message PlayPause {
 	bool pause = 1;
-	google.protobuf.Timestamp timestamp = 2;
+	google.protobuf.Duration timestamp = 2;
 }
 
 message PlaybackJump {
-	google.protobuf.Timestamp timestamp = 1;
+	google.protobuf.Duration timestamp = 1;
 }

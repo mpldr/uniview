@@ -3,14 +3,18 @@ package mansion
 import (
 	"context"
 	"sync"
+	"time"
 
 	"git.sr.ht/~mpldr/uniview/protocol"
+	"git.sr.ht/~poldi1405/glog"
 )
 
 type room struct {
 	ctx           context.Context
 	clientFeed    []*client
 	clientFeedMtx sync.Mutex
+
+	playbackStart time.Time
 }
 
 func newRoom(ctx context.Context) *room {
@@ -31,6 +35,8 @@ func (r *room) Broadcast(ev *protocol.RoomEvent) {
 	r.clientFeedMtx.Lock()
 	defer r.clientFeedMtx.Unlock()
 
+	glog.Debugf("broadcasting message to %d clients", len(r.clientFeed))
+
 	max := len(r.clientFeed)
 	for i := 0; i < max; i++ {
 		for r.clientFeed[i].Dead() {
@@ -39,6 +45,9 @@ func (r *room) Broadcast(ev *protocol.RoomEvent) {
 			r.clientFeed = r.clientFeed[:len(r.clientFeed)-1]
 			max--
 		}
-		r.clientFeed[i].Send(ev)
+		err := r.clientFeed[i].Send(ev)
+		if err != nil {
+			glog.Warnf("failed to send to client %d: %v", i, err)
+		}
 	}
 }

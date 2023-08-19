@@ -4,6 +4,8 @@ go 1.20
 
 require (
 	git.sr.ht/~poldi1405/glog v1.0.1
+	github.com/adrg/xdg v0.4.0
+	github.com/fsnotify/fsnotify v1.6.0
 	google.golang.org/grpc v1.57.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.3.0
 	google.golang.org/protobuf v1.31.0
