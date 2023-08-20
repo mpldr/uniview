@@ -1,13 +1,16 @@
 GO?=$(shell which go)
 BUILD_OPTS?=-trimpath -v
 
+VERSION?=$(shell git describe --always --dirty || echo 0.1.0)
+GO_LDFLAGS=-X main.Version=$(VERSION)
+
 GOSRC!=find * -type f \( -name '*.go' -and -not -name '*_test.go' \)
 GOSRC+=go.mod go.sum
 
 all: uniview univiewd
 
 uniview: $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go
-	$(GO) build $(BUILD_OPTS) -o $@
+	$(GO) build $(BUILD_OPTS) -ldflags "$(GO_LDFLAGS)" -o $@
 
 univiewd: uniview
 	ln -f $< $@

@@ -8,7 +8,7 @@ import (
 )
 
 // Version is filled with the programs version at compile time
-var Version = "devel"
+var Version = "0.1.0"
 
 func main() {
 	defer glog.PanicHandler()
