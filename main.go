@@ -12,6 +12,7 @@ var Version = "0.1.0"
 
 func main() {
 	defer glog.PanicHandler()
+	glog.SetLevel(glog.INFO)
 
 	glog.Infof("starting uniview version %s", Version)
 	if filepath.Base(os.Args[0]) == "univiewd" {
