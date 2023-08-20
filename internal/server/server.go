@@ -38,8 +38,13 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 			glog.Debugf("closed connection")
 			return io.EOF
 		case err != nil:
-			glog.Errorf("feed: failed to read value: %v", err)
-			return fmt.Errorf("error while receiving: %w", err)
+			select {
+			case <-feed.Context().Done():
+				return nil
+			default:
+				glog.Errorf("feed: failed to read value: %v", err)
+				return fmt.Errorf("error while receiving: %w", err)
+			}
 		}
 		glog.Debugf("received %s from %d", ev.Type, id)
 		room.Broadcast(ev, id)
