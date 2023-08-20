@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 
 	"git.sr.ht/~mpldr/uniview/protocol"
 	"git.sr.ht/~poldi1405/glog"
@@ -27,7 +28,8 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 	}
 
 	room := s.Rooms.GetRoom(joinEv.Name)
-	room.Client(feed)
+	id := rand.Int63()
+	room.Client(feed, id)
 
 	for {
 		ev, err = feed.Recv()
@@ -39,6 +41,7 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 			glog.Errorf("feed: failed to read value: %v", err)
 			return fmt.Errorf("error while receiving: %w", err)
 		}
-		room.Broadcast(ev)
+		glog.Debugf("received %s from %d", ev.Type, id)
+		room.Broadcast(ev, id)
 	}
 }
