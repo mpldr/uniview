@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
 
 	"git.sr.ht/~mpldr/uniview/protocol"
 	"git.sr.ht/~poldi1405/glog"
@@ -27,8 +26,7 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 		return errors.New("missing join event")
 	}
 
-	room := s.Rooms.GetRoom(joinEv.Name)
-	id := rand.Int63()
+	room, id := s.Rooms.GetRoom(joinEv.Name)
 	glog.Debugf("client has been assigned id %d", id)
 	room.Client(feed, id)
 

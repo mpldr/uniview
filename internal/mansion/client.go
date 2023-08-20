@@ -10,10 +10,10 @@ type client struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 	feed   protocol.UniView_RoomServer
-	id     int64
+	id     uint64
 }
 
-func newClient(parent context.Context, feed protocol.UniView_RoomServer, id int64) *client {
+func newClient(parent context.Context, feed protocol.UniView_RoomServer, id uint64) *client {
 	c := &client{
 		feed: feed,
 		id:   id,

@@ -13,6 +13,7 @@ type Mansion struct {
 	cancel       context.CancelFunc
 	rooms        map[string]*room
 	roomsMtx     sync.RWMutex
+	clientID     atomic.Uint64
 	shuttingDown atomic.Bool
 }
 
@@ -25,12 +26,13 @@ func New() *Mansion {
 	}
 }
 
-func (m *Mansion) GetRoom(name string) *room {
+func (m *Mansion) GetRoom(name string) (*room, uint64) {
 	glog.Tracef("requested room: %s", name)
 	m.roomsMtx.RLock()
 	if r, exists := m.rooms[name]; exists {
 		m.roomsMtx.RUnlock()
-		return r
+		id := m.clientID.Add(1)
+		return r, id
 	}
 
 	glog.Tracef("creating new room %q", name)
@@ -40,7 +42,8 @@ func (m *Mansion) GetRoom(name string) *room {
 	m.rooms[name] = r
 	m.roomsMtx.Unlock()
 
-	return r
+	id := m.clientID.Add(1)
+	return r, id
 }
 
 func (m *Mansion) Close() {

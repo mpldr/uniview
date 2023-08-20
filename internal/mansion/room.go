@@ -24,14 +24,14 @@ func newRoom(ctx context.Context) *room {
 	return r
 }
 
-func (r *room) Client(feed protocol.UniView_RoomServer, id int64) {
+func (r *room) Client(feed protocol.UniView_RoomServer, id uint64) {
 	r.clientFeedMtx.Lock()
 	defer r.clientFeedMtx.Unlock()
 
 	r.clientFeed = append(r.clientFeed, newClient(r.ctx, feed, id))
 }
 
-func (r *room) Broadcast(ev *protocol.RoomEvent, id int64) {
+func (r *room) Broadcast(ev *protocol.RoomEvent, id uint64) {
 	r.clientFeedMtx.Lock()
 	defer r.clientFeedMtx.Unlock()
 
@@ -58,7 +58,7 @@ func (r *room) Broadcast(ev *protocol.RoomEvent, id int64) {
 	}
 }
 
-func (r *room) Disconnect(id int64) {
+func (r *room) Disconnect(id uint64) {
 	r.clientFeedMtx.Lock()
 	defer r.clientFeedMtx.Unlock()
 
