@@ -24,6 +24,7 @@ enum EventType {
 	EVENT_PAUSE = 2;
 	EVENT_JUMP = 3;
 	EVENT_SERVER_CLOSE = 4;
+	EVENT_CLIENT_DISCONNECT = 5;
 }
 
 message RoomJoin {

@@ -29,6 +29,7 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 
 	room := s.Rooms.GetRoom(joinEv.Name)
 	id := rand.Int63()
+	glog.Debugf("client has been assigned id %d", id)
 	room.Client(feed, id)
 
 	for {
@@ -45,6 +46,12 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 				glog.Errorf("feed: failed to read value: %v", err)
 				return fmt.Errorf("error while receiving: %w", err)
 			}
+		}
+		switch ev.Type {
+		case protocol.EventType_EVENT_CLIENT_DISCONNECT:
+			room.Disconnect(id)
+			glog.Debugf("client %d disconnected", id)
+			return nil
 		}
 		glog.Debugf("received %s from %d", ev.Type, id)
 		room.Broadcast(ev, id)

@@ -109,6 +109,10 @@ func startClient() error {
 				},
 			})
 		case <-p.Quit():
+			stream.SendMsg(&protocol.RoomEvent{
+				Type: protocol.EventType_EVENT_CLIENT_DISCONNECT,
+			})
+			stream.CloseSend()
 			return nil
 		}
 	}

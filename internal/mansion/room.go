@@ -57,3 +57,17 @@ func (r *room) Broadcast(ev *protocol.RoomEvent, id int64) {
 		}
 	}
 }
+
+func (r *room) Disconnect(id int64) {
+	r.clientFeedMtx.Lock()
+	defer r.clientFeedMtx.Unlock()
+
+	for k, v := range r.clientFeed {
+		if v.id == id {
+			r.clientFeed[k] = r.clientFeed[len(r.clientFeed)-1]
+			r.clientFeed[len(r.clientFeed)-1] = nil
+			r.clientFeed = r.clientFeed[:len(r.clientFeed)-1]
+			return
+		}
+	}
+}
