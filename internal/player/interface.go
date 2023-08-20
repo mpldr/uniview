@@ -9,4 +9,6 @@ type Interface interface {
 	GetPlaybackPos() (time.Duration, error)
 	NotifySeek() <-chan time.Duration
 	NotifyPause() <-chan bool
+	Quit() <-chan struct{}
+	Close()
 }

@@ -30,6 +30,7 @@ func startClient() error {
 	if err != nil {
 		return fmt.Errorf("failed to start mpv: %w", err)
 	}
+	defer p.Close()
 
 	glog.Debugf("loading file %q…", os.Args[3])
 	err = p.LoadFile(os.Args[3])
@@ -107,6 +108,8 @@ func startClient() error {
 					},
 				},
 			})
+		case <-p.Quit():
+			return nil
 		}
 	}
 }

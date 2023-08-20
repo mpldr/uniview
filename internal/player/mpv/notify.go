@@ -9,3 +9,7 @@ func (m *MPV) NotifyPause() <-chan bool {
 func (m *MPV) NotifySeek() <-chan time.Duration {
 	return m.notifySeek
 }
+
+func (m *MPV) Quit() <-chan struct{} {
+	return m.quitchan
+}

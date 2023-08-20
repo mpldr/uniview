@@ -26,6 +26,7 @@ type MPV struct {
 
 	notifyPause chan bool
 	notifySeek  chan time.Duration
+	quitchan    chan struct{}
 
 	notifySeekInternal chan struct{}
 	notifyIdle         chan struct{}
@@ -67,6 +68,7 @@ func New() (*MPV, error) {
 		notifySeek:         make(chan time.Duration, 1),
 		notifySeekInternal: make(chan struct{}, 1),
 		notifyIdle:         make(chan struct{}, 1),
+		quitchan:           make(chan struct{}, 1),
 		commands:           make(chan command, 16),
 	}
 	p.cmd = exec.Command(mpvPath, "--input-ipc-server="+socketPath, "--player-operation-mode=pseudo-gui", "--idle")
@@ -109,4 +111,11 @@ outer:
 	go p.handleSeekEvents()
 
 	return p, nil
+}
+
+func (p *MPV) Close() {
+	if p.dead.Load() {
+		return
+	}
+	p.cmd.Process.Kill()
 }

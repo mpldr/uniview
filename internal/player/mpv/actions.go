@@ -6,10 +6,14 @@ import (
 	"math/rand"
 	"time"
 
+	"git.sr.ht/~mpldr/uniview/internal/player"
 	"git.sr.ht/~poldi1405/glog"
 )
 
 func (p *MPV) Pause(state bool) error {
+	if p.dead.Load() {
+		return player.ErrPlayerDead
+	}
 	req := rand.Int()
 	glog.Tracef("sending command to set pause to %t", state)
 	p.send(command{
@@ -25,6 +29,9 @@ func (p *MPV) Pause(state bool) error {
 }
 
 func (p *MPV) LoadFile(path string) error {
+	if p.dead.Load() {
+		return player.ErrPlayerDead
+	}
 	req := rand.Int()
 	glog.Tracef("sending command to load %q", path)
 	p.send(command{
@@ -40,6 +47,9 @@ func (p *MPV) LoadFile(path string) error {
 }
 
 func (p *MPV) Seek(ts time.Duration) error {
+	if p.dead.Load() {
+		return player.ErrPlayerDead
+	}
 	req := rand.Int()
 	glog.Tracef("sending command to seek to %s", ts)
 	p.send(command{
@@ -55,6 +65,9 @@ func (p *MPV) Seek(ts time.Duration) error {
 }
 
 func (p *MPV) GetPlaybackPos() (time.Duration, error) {
+	if p.dead.Load() {
+		return 0, player.ErrPlayerDead
+	}
 	req := rand.Int()
 	glog.Trace("sending command to query playback position")
 	p.send(command{

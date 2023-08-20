@@ -43,7 +43,8 @@ func (p *MPV) monitor() {
 			}
 		case res.Event == "end-file":
 			if res.Reason == "quit" {
-				// TODO: kill parent
+				p.dead.Store(true)
+				p.quitchan <- struct{}{}
 				return
 			}
 		case res.RequestID != 0:

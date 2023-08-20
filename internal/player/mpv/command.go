@@ -8,6 +8,9 @@ import (
 )
 
 func (p *MPV) send(cmd command) {
+	if p.dead.Load() {
+		return
+	}
 	cmdJSON, _ := json.Marshal(cmd)
 	_, err := fmt.Fprintf(p.conn, "%s\n", cmdJSON)
 	glog.Tracef("sent: %s: %v", cmdJSON, err)
