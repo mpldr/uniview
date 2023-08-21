@@ -7,6 +7,7 @@ import (
 
 	"git.sr.ht/~mpldr/uniview/protocol"
 	"git.sr.ht/~poldi1405/glog"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 func (s *Server) Room(feed protocol.UniView_RoomServer) error {
@@ -29,6 +30,23 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 	room, id := s.Rooms.GetRoom(joinEv.Name)
 	glog.Debugf("client has been assigned id %d", id)
 	room.Client(feed, id)
+	if room.GetPosition() < 0 {
+		if joinEv.Timestamp.AsDuration() < 0 {
+			joinEv.Timestamp = durationpb.New(0)
+		}
+		room.SetPosition(joinEv.Timestamp.AsDuration())
+		room.SetPause(false)
+	} else {
+		feed.Send(&protocol.RoomEvent{
+			Type: protocol.EventType_EVENT_PAUSE,
+			Event: &protocol.RoomEvent_PauseEvent{
+				PauseEvent: &protocol.PlayPause{
+					Pause:     room.GetPause(),
+					Timestamp: durationpb.New(room.GetPosition()),
+				},
+			},
+		})
+	}
 
 	for {
 		ev, err = feed.Recv()
@@ -46,6 +64,14 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 			}
 		}
 		switch ev.Type {
+		case protocol.EventType_EVENT_PAUSE:
+			if ev.GetPauseEvent().GetTimestamp().AsDuration() < 0 {
+				break
+			}
+			room.SetPause(ev.GetPauseEvent().GetPause())
+			room.SetPosition(ev.GetJoin().GetTimestamp().AsDuration())
+		case protocol.EventType_EVENT_JUMP:
+			room.SetPosition(ev.GetJumpEvent().GetTimestamp().AsDuration())
 		case protocol.EventType_EVENT_CLIENT_DISCONNECT:
 			room.Disconnect(id)
 			glog.Debugf("client %d disconnected", id)

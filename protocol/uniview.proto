@@ -29,6 +29,8 @@ enum EventType {
 
 message RoomJoin {
 	string name = 1;
+	google.protobuf.Duration timestamp = 2;
+	string url = 3;
 }
 
 message PlayPause {

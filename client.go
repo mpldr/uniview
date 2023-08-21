@@ -52,12 +52,19 @@ func startClient() error {
 		return fmt.Errorf("failed to get room feed: %w", err)
 	}
 
+	pos, err := p.GetPlaybackPos()
+	if err != nil {
+		pos = -1
+	}
+
 	glog.Debugf("Joining room %q", os.Args[2])
 	err = stream.Send(&protocol.RoomEvent{
 		Type: protocol.EventType_EVENT_JOIN,
 		Event: &protocol.RoomEvent_Join{
 			Join: &protocol.RoomJoin{
-				Name: os.Args[2],
+				Name:      os.Args[2],
+				Timestamp: durationpb.New(pos),
+				Url:       os.Args[3],
 			},
 		},
 	})

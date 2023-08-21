@@ -14,12 +14,16 @@ type room struct {
 	clientFeed    []*client
 	clientFeedMtx sync.Mutex
 
-	playbackStart time.Time
+	playbackStart  time.Time
+	playbackPos    time.Duration
+	playbackPaused bool
 }
 
 func newRoom(ctx context.Context) *room {
 	r := &room{
-		ctx: ctx,
+		ctx:            ctx,
+		playbackPos:    -1,
+		playbackPaused: true,
 	}
 	return r
 }
@@ -35,7 +39,7 @@ func (r *room) Broadcast(ev *protocol.RoomEvent, id uint64) {
 	r.clientFeedMtx.Lock()
 	defer r.clientFeedMtx.Unlock()
 
-	glog.Debugf("broadcasting message to %d clients", len(r.clientFeed))
+	glog.Debugf("broadcasting message to %d clients", len(r.clientFeed)-1)
 
 	max := len(r.clientFeed)
 	for i := 0; i < max; i++ {
@@ -56,6 +60,26 @@ func (r *room) Broadcast(ev *protocol.RoomEvent, id uint64) {
 			glog.Warnf("failed to send to client %d: %v", i, err)
 		}
 	}
+}
+
+func (r *room) SetPosition(pos time.Duration) {
+	r.playbackStart = time.Now().Add(-1 * pos)
+	r.playbackPos = pos
+}
+
+func (r *room) GetPosition() time.Duration {
+	if r.playbackPaused {
+		return r.playbackPos
+	}
+	return time.Since(r.playbackStart)
+}
+
+func (r *room) SetPause(pause bool) {
+	r.playbackPaused = pause
+}
+
+func (r *room) GetPause() bool {
+	return r.playbackPaused
 }
 
 func (r *room) Disconnect(id uint64) {
