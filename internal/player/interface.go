@@ -11,4 +11,5 @@ type Interface interface {
 	NotifyPause() <-chan bool
 	Quit() <-chan struct{}
 	Close()
+	PlayerReady() <-chan struct{}
 }

@@ -27,6 +27,7 @@ type MPV struct {
 	notifyPause chan bool
 	notifySeek  chan time.Duration
 	quitchan    chan struct{}
+	playerReady chan struct{}
 
 	notifySeekInternal chan struct{}
 	notifyIdle         chan struct{}
@@ -69,6 +70,7 @@ func New() (*MPV, error) {
 		notifySeekInternal: make(chan struct{}, 1),
 		notifyIdle:         make(chan struct{}, 1),
 		quitchan:           make(chan struct{}, 1),
+		playerReady:        make(chan struct{}),
 		commands:           make(chan command, 16),
 	}
 	p.cmd = exec.Command(mpvPath, "--input-ipc-server="+socketPath, "--player-operation-mode=pseudo-gui", "--idle")

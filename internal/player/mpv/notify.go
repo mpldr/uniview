@@ -13,3 +13,7 @@ func (m *MPV) NotifySeek() <-chan time.Duration {
 func (m *MPV) Quit() <-chan struct{} {
 	return m.quitchan
 }
+
+func (m *MPV) PlayerReady() <-chan struct{} {
+	return m.playerReady
+}

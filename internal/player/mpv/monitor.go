@@ -47,6 +47,12 @@ func (p *MPV) monitor() {
 				p.quitchan <- struct{}{}
 				return
 			}
+		case res.Event == "file-loaded":
+			select {
+			case <-p.playerReady:
+			default:
+				close(p.playerReady)
+			}
 		case res.RequestID != 0:
 			p.responsesMtx.Lock()
 			p.responses[res.RequestID] = res

@@ -135,6 +135,7 @@ func recvChanges(cl protocol.UniView_RoomClient, p player.Interface, ignoreSeek 
 
 		glog.Debugf("received %s", ev.Type)
 
+		<-p.PlayerReady()
 		ignoreSeek.Store(true)
 		switch ev.Type {
 		case protocol.EventType_EVENT_PAUSE:
