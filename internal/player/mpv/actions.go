@@ -53,7 +53,7 @@ func (p *MPV) Seek(ts time.Duration) error {
 	req := rand.Int()
 	glog.Tracef("sending command to seek to %s", ts)
 	p.send(command{
-		Command:   []any{"seek", ts, "absolute"},
+		Command:   []any{"set_property", "time-pos", float64(ts/time.Millisecond) / 1000},
 		RequestID: req,
 	})
 	res := p.getResponse(req)
