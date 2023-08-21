@@ -33,7 +33,9 @@ type MPV struct {
 	notifyIdle         chan struct{}
 	commands           chan command
 
-	dead atomic.Bool
+	dead      *atomic.Bool
+	dropSeek  *atomic.Bool
+	dropPause *atomic.Bool
 }
 
 func New() (*MPV, error) {
@@ -72,6 +74,9 @@ func New() (*MPV, error) {
 		quitchan:           make(chan struct{}, 1),
 		playerReady:        make(chan struct{}),
 		commands:           make(chan command, 16),
+		dead:               &atomic.Bool{},
+		dropSeek:           &atomic.Bool{},
+		dropPause:          &atomic.Bool{},
 	}
 	p.cmd = exec.Command(mpvPath, "--input-ipc-server="+socketPath, "--player-operation-mode=pseudo-gui", "--idle")
 	if err := p.cmd.Start(); err != nil {

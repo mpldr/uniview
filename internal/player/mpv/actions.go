@@ -16,6 +16,7 @@ func (p *MPV) Pause(state bool) error {
 	}
 	req := rand.Int()
 	glog.Tracef("sending command to set pause to %t", state)
+	p.dropPause.Store(true)
 	p.send(command{
 		Command:   []any{"set_property", "pause", state},
 		RequestID: req,
@@ -52,6 +53,7 @@ func (p *MPV) Seek(ts time.Duration) error {
 	}
 	req := rand.Int()
 	glog.Tracef("sending command to seek to %s", ts)
+	p.dropSeek.Store(true)
 	p.send(command{
 		Command:   []any{"set_property", "time-pos", float64(ts/time.Millisecond) / 1000},
 		RequestID: req,

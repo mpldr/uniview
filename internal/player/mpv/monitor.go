@@ -32,6 +32,11 @@ func (p *MPV) monitor() {
 
 		switch {
 		case res.Event == "seek":
+			if !p.dropSeek.Load() {
+				glog.Trace("dropped seek")
+				p.dropSeek.Store(false)
+				continue
+			}
 			select {
 			case p.notifySeekInternal <- struct{}{}:
 			default:
@@ -74,6 +79,10 @@ func (p *MPV) pollPause() {
 		if pause, ok := res.Data.(bool); ok {
 			if pause != pauseState {
 				pauseState = pause
+				if p.dropPause.Load() {
+					p.dropPause.Store(false)
+					continue
+				}
 				select {
 				case p.notifyPause <- pauseState:
 				default:

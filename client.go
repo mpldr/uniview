@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"sync/atomic"
-	"time"
 
 	"git.sr.ht/~mpldr/uniview/internal/player"
 	"git.sr.ht/~mpldr/uniview/internal/player/mpv"
@@ -72,19 +70,13 @@ func startClient() error {
 		return fmt.Errorf("failed to join room: %w", err)
 	}
 
-	ignoreSeek := &atomic.Bool{}
-
 	glog.Debug("waiting for remote events…")
-	go recvChanges(stream, p, ignoreSeek)
+	go recvChanges(stream, p)
 
 	glog.Debug("waiting for player events…")
 	for {
 		select {
 		case timestamp := <-p.NotifySeek():
-			if ignoreSeek.Load() {
-				glog.Debug("seek ignored")
-				continue
-			}
 			glog.Debugf("local: seek to %s detected", timestamp)
 			stream.Send(&protocol.RoomEvent{
 				Type: protocol.EventType_EVENT_JUMP,
@@ -95,10 +87,6 @@ func startClient() error {
 				},
 			})
 		case pause := <-p.NotifyPause():
-			if ignoreSeek.Load() {
-				glog.Debug("pause ignored")
-				continue
-			}
 			glog.Debugf("local: pause state change to %t detected", pause)
 			pos, err := p.GetPlaybackPos()
 			if err != nil {
@@ -125,7 +113,7 @@ func startClient() error {
 	}
 }
 
-func recvChanges(cl protocol.UniView_RoomClient, p player.Interface, ignoreSeek *atomic.Bool) {
+func recvChanges(cl protocol.UniView_RoomClient, p player.Interface) {
 	for {
 		ev, err := cl.Recv()
 		if err != nil {
@@ -136,7 +124,6 @@ func recvChanges(cl protocol.UniView_RoomClient, p player.Interface, ignoreSeek 
 		glog.Debugf("received %s", ev.Type)
 
 		<-p.PlayerReady()
-		ignoreSeek.Store(true)
 		switch ev.Type {
 		case protocol.EventType_EVENT_PAUSE:
 			pauseEv := ev.GetPauseEvent()
@@ -159,7 +146,5 @@ func recvChanges(cl protocol.UniView_RoomClient, p player.Interface, ignoreSeek 
 			glog.Debugf("remote: jump to %s", jumpEv.Timestamp.AsDuration())
 			p.Seek(jumpEv.Timestamp.AsDuration())
 		}
-		time.Sleep(50 * time.Millisecond)
-		ignoreSeek.Store(false)
 	}
 }
