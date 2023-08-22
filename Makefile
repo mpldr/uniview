@@ -10,6 +10,10 @@ GO_LDFLAGS+=$(EXTRA_GO_LDFLAGS)
 GOSRC!=find * -type f \( -name '*.go' -and -not -name '*_test.go' \)
 GOSRC+=go.mod go.sum
 
+DESTDIR?=
+PREFIX?=/usr
+BINDIR?=$(PREFIX)/bin
+
 all: uniview univiewd
 
 uniview: $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go
@@ -35,3 +39,9 @@ tools/protoc-gen-go: go.mod
 
 tools/protoc-gen-go-grpc: go.mod
 	$(GO) build -o $@ -v google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
+.PHONY: install
+install:
+	install -Dm755 uniview $(DESTDIR)$(BINDIR)/uniview
+	install -Dm755 uniview $(DESTDIR)$(BINDIR)/univiewd
+	install -Dm755 contrib/uniview.desktop $(DESTDIR)$(PREFIX)/share/applications/uniview.desktop
