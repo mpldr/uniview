@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 
 	"git.sr.ht/~mpldr/uniview/internal/player"
@@ -14,12 +15,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-func startClient() error {
-	if len(os.Args) < 4 {
-		fmt.Println("Usage: uniview [server] [room] [file]")
-		os.Exit(2)
-	}
-
+func startClient(u url.URL) error {
 	var p player.Interface
 	var err error
 
@@ -30,16 +26,19 @@ func startClient() error {
 	}
 	defer p.Close()
 
-	glog.Debugf("loading file %q…", os.Args[3])
-	err = p.LoadFile(os.Args[3])
+	glog.Debugf("loading file %q…", u.Query().Get("file"))
+	err = p.LoadFile(u.Query().Get("file"))
 	if err != nil {
 		return fmt.Errorf("failed to load file: %w", err)
 	}
 
 	glog.Debugf("connecting to remote…")
-	gconn, err := grpc.Dial(os.Args[1], grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if u.Port() == "" {
+		u.Host += ":443"
+	}
+	gconn, err := grpc.Dial(u.Host, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return fmt.Errorf("failed to connect to server: %w", err)
+		return fmt.Errorf("failed to connect to server %q: %w", u.Host, err)
 	}
 	defer gconn.Close()
 
@@ -55,14 +54,19 @@ func startClient() error {
 		pos = -1
 	}
 
-	glog.Debugf("Joining room %q", os.Args[2])
+	room := strings.TrimPrefix(u.Path, "/")
+	if len(room) == 0 {
+		return errors.New("no room provided")
+	}
+
+	glog.Debugf("Joining room %q", room)
 	err = stream.Send(&protocol.RoomEvent{
 		Type: protocol.EventType_EVENT_JOIN,
 		Event: &protocol.RoomEvent_Join{
 			Join: &protocol.RoomJoin{
-				Name:      os.Args[2],
+				Name:      room,
 				Timestamp: durationpb.New(pos),
-				Url:       os.Args[3],
+				Url:       u.Query().Get("file"),
 			},
 		},
 	})

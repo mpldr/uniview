@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.5
+Name=uniview
+
+GenericName=Uniview
+GenericName[de]=Uniview
+Categories=Network
+
+Type=Application
+NoDisplay=true
+Icon=uniview
+Terminal=false
+Exec=uniview %u
+MimeType=x-scheme-handler/uniview
