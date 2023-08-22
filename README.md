@@ -1,5 +1,7 @@
 # uniview
 
+<img alt="Uniview Logo" src="https://git.sr.ht/~mpldr/uniview/blob/master/contrib/icon.svg" height="64">
+
 This program syncronises video playback across multiple mpv instances.
 
 ## Building it

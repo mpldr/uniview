@@ -45,3 +45,4 @@ install:
 	install -Dm755 uniview $(DESTDIR)$(BINDIR)/uniview
 	install -Dm755 uniview $(DESTDIR)$(BINDIR)/univiewd
 	install -Dm755 contrib/uniview.desktop $(DESTDIR)$(PREFIX)/share/applications/uniview.desktop
+	install -Dm755 contrib/icon.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/uniview.svg

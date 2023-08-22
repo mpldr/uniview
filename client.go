@@ -2,9 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
+	"strings"
+	"time"
 
 	"git.sr.ht/~mpldr/uniview/internal/player"
 	"git.sr.ht/~mpldr/uniview/internal/player/mpv"
@@ -15,7 +19,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-func startClient(u url.URL) error {
+func startClient(u *url.URL) error {
 	var p player.Interface
 	var err error
 
@@ -36,7 +40,13 @@ func startClient(u url.URL) error {
 	if u.Port() == "" {
 		u.Host += ":443"
 	}
-	gconn, err := grpc.Dial(u.Host, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	var opts []grpc.DialOption
+	if u.Query().Has("insecure") || insecureByDefault(u.Hostname()) {
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
+
+	gconn, err := grpc.Dial(u.Host, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to connect to server %q: %w", u.Host, err)
 	}
@@ -151,4 +161,40 @@ func recvChanges(cl protocol.UniView_RoomClient, p player.Interface) {
 			p.Seek(jumpEv.Timestamp.AsDuration())
 		}
 	}
+}
+
+func insecureByDefault(host string) bool {
+	dnsServerList := []string{
+		"9.9.9.9",        // Quad9
+		"45.11.45.11",    // dns.sb
+		"1.1.1.1",        // CloudFlare
+		"8.8.8.8",        // Google
+		"208.67.222.222", // OpenDNS
+	}
+
+	for _, dnsServer := range dnsServerList {
+		r := &net.Resolver{
+			PreferGo: true,
+			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+				d := net.Dialer{}
+				return d.DialContext(ctx, "udp", dnsServer)
+			},
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 128*time.Millisecond)
+		ip, err := r.LookupIP(ctx, "ip", host)
+		cancel()
+		if err != nil {
+			continue
+		}
+		if len(ip) == 0 {
+			continue
+		}
+		return ip[0].IsLoopback() || ip[0].IsPrivate()
+	}
+
+	ip, err := net.ResolveIPAddr("ip", host)
+	if err != nil {
+		return false
+	}
+	return ip.IP.IsLoopback()
 }
