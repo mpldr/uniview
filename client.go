@@ -159,6 +159,13 @@ func recvChanges(cl protocol.UniView_RoomClient, p player.Interface) {
 
 			glog.Debugf("remote: jump to %s", jumpEv.Timestamp.AsDuration())
 			p.Seek(jumpEv.Timestamp.AsDuration())
+		case protocol.EventType_EVENT_SERVER_CLOSE:
+			glog.Info("received shutdown notification from the server. Disconnecting.")
+			cl.CloseSend()
+			p.Quit()
+			return
+		default:
+			glog.Warnf("received unknown event: %s", ev.Type)
 		}
 	}
 }
