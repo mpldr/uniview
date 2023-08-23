@@ -164,6 +164,7 @@ func recvChanges(cl protocol.UniView_RoomClient, p player.Interface) {
 			cl.CloseSend()
 			p.Quit()
 			return
+		case protocol.EventType_EVENT_SERVER_PING: // ignore
 		default:
 			glog.Warnf("received unknown event: %s", ev.Type)
 		}
