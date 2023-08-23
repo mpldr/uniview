@@ -20,13 +20,11 @@ connect to.
 
 ## Roadmap
 
-- Synchronise upon connection
 - Support playback queues
-- TLS
 - API docs
 - CI Pipeline
-- maybe a UI
-- maybe a webinterface with stats
+- a UI for managing the queue
+- better handling of web streams
 - bugsquashing
 
 ## Licence
