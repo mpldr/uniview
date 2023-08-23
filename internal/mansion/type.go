@@ -52,8 +52,34 @@ func (m *Mansion) housekeeping() {
 			wg.Wait()
 			close(m.shutDown)
 			return
-		case <-time.After(10 * time.Second):
-			// TODO: implement
+		case <-time.After(5 * time.Minute):
+			glog.Debug("running housekeeper")
+			m.roomsMtx.RLock()
+			var wg sync.WaitGroup
+			for n, r := range m.rooms {
+				wg.Add(1)
+				go func(r *room, name string) {
+					defer wg.Done()
+					defer glog.Tracef("pinging room %s", name)
+
+					r.Broadcast(&protocol.RoomEvent{
+						Type: protocol.EventType_EVENT_SERVER_PING,
+					}, 0)
+				}(r, n)
+			}
+			wg.Wait()
+			glog.Debug("finished pinging")
+			m.roomsMtx.RUnlock()
+
+			m.roomsMtx.Lock()
+			for n, r := range m.rooms {
+				if len(r.clientFeed) == 0 {
+					glog.Debugf("deleted room %s", n)
+					delete(m.rooms, n)
+				}
+			}
+			glog.Debug("housekeeper finished")
+			m.roomsMtx.Unlock()
 		}
 	}
 }
