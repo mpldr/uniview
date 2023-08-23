@@ -1,8 +1,6 @@
 package server
 
 import (
-	"errors"
-	"fmt"
 	"io"
 
 	"git.sr.ht/~mpldr/uniview/protocol"
@@ -17,16 +15,16 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 	ev, err := feed.Recv()
 	if err != nil {
 		glog.Warnf("failed to receive initial message: %v", err)
-		return fmt.Errorf("failed to receive initial message: %w", err)
+		return status.Errorf(codes.Internal, "failed to receive join event: %v", err)
 	}
 	if ev.Type != protocol.EventType_EVENT_JOIN {
 		glog.Warnf("received unexpected join event: %s", ev.Type)
-		return fmt.Errorf("received unexpected join event: %s", ev.Type)
+		return status.Errorf(codes.FailedPrecondition, "received unexpected join event: %s", ev.Type)
 	}
 
 	joinEv := ev.GetJoin()
 	if joinEv == nil {
-		return errors.New("missing join event")
+		return status.Error(codes.FailedPrecondition, "incomplete join event received")
 	}
 
 	if s.Rooms.Closing() {
@@ -59,14 +57,14 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 		switch {
 		case err == io.EOF:
 			glog.Debugf("closed connection")
-			return io.EOF
+			return nil
 		case err != nil:
 			select {
 			case <-feed.Context().Done():
 				return nil
 			default:
 				glog.Errorf("feed: failed to read value: %v", err)
-				return fmt.Errorf("error while receiving: %w", err)
+				return status.Errorf(codes.Internal, "failed to receive event: %v", err)
 			}
 		}
 		switch ev.Type {
