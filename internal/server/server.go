@@ -7,6 +7,8 @@ import (
 
 	"git.sr.ht/~mpldr/uniview/protocol"
 	"git.sr.ht/~poldi1405/glog"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
@@ -25,6 +27,10 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 	joinEv := ev.GetJoin()
 	if joinEv == nil {
 		return errors.New("missing join event")
+	}
+
+	if s.Rooms.Closing() {
+		return status.Error(codes.Unavailable, "the server is shutting down")
 	}
 
 	room, id := s.Rooms.GetRoom(joinEv.Name)
