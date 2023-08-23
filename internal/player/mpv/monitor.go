@@ -32,7 +32,7 @@ func (p *MPV) monitor() {
 
 		switch {
 		case res.Event == "seek":
-			if !p.dropSeek.Load() {
+			if p.dropSeek.Load() {
 				glog.Trace("dropped seek")
 				p.dropSeek.Store(false)
 				continue
