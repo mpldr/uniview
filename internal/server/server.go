@@ -34,6 +34,7 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 	room, id := s.Rooms.GetRoom(joinEv.Name)
 	glog.Debugf("client has been assigned id %d", id)
 	room.Client(feed, id)
+	defer room.Disconnect(id)
 	if room.GetPosition() < 0 {
 		if joinEv.Timestamp.AsDuration() < 0 {
 			joinEv.Timestamp = durationpb.New(0)
@@ -77,7 +78,6 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 		case protocol.EventType_EVENT_JUMP:
 			room.SetPosition(ev.GetJumpEvent().GetTimestamp().AsDuration())
 		case protocol.EventType_EVENT_CLIENT_DISCONNECT:
-			room.Disconnect(id)
 			glog.Debugf("client %d disconnected", id)
 			return nil
 		}
