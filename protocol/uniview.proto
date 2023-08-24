@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: © Moritz Poldrack
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 syntax = "proto3";
 
 package protocol;

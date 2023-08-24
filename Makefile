@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: © nobody
+# SPDX-License-Identifier: CC0-1.0
+
 GO?=$(shell which go)
 BUILD_OPTS?=-trimpath -v
 

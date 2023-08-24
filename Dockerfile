@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: © nobody
+# SPDX-License-Identifier: CC0-1.0
+
 FROM golang:alpine AS build
 RUN apk add make
 COPY . /src

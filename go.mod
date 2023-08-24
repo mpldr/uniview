@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: © nobody
+// SPDX-License-Identifier: CC0-1.0
+
 module git.sr.ht/~mpldr/uniview
 
 go 1.20
