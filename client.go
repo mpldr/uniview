@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -15,6 +16,7 @@ import (
 	"git.sr.ht/~mpldr/uniview/protocol"
 	"git.sr.ht/~poldi1405/glog"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
@@ -44,6 +46,8 @@ func startClient(u *url.URL) error {
 	var opts []grpc.DialOption
 	if u.Query().Has("insecure") || insecureByDefault(u.Hostname()) {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	} else {
+		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	}
 
 	gconn, err := grpc.Dial(u.Host, opts...)
