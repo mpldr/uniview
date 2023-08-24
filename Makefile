@@ -1,7 +1,7 @@
 GO?=$(shell which go)
 BUILD_OPTS?=-trimpath -v
 
-VERSION?=$(shell git describe --always --dirty || echo 0.1.0)
+VERSION?=$(shell git describe --always --dirty || echo 0.2.0)
 
 GO_LDFLAGS:=
 GO_LDFLAGS+=-X main.Version=$(VERSION)
