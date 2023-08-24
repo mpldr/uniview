@@ -30,7 +30,7 @@ func main() {
 	}
 
 	app := cli.App("uniview", "synchronise video playback")
-	app.Spec = "[--insecure] SERVER ROOM FILE | URL"
+	app.Spec = "([--insecure] SERVER ROOM FILE) | URL"
 
 	var server, room, file, rawurl string
 	var insecure bool
