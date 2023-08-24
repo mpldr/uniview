@@ -43,6 +43,9 @@ tools/protoc-gen-go: go.mod
 tools/protoc-gen-go-grpc: go.mod
 	$(GO) build -o $@ -v google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
+AUTHORS: .git/index
+	git log '--pretty=format:%an%n%(trailers:key=co-authored-by,valueonly)' | sed -e 's/ <.*//' | sort -f | uniq | tail -n+2 > $@
+
 .PHONY: install
 install:
 	install -Dm755 uniview $(DESTDIR)$(BINDIR)/uniview

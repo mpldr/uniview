@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: © nobody
+# SPDX-License-Identifier: CC0-1.0
+
+---
+image: archlinux
+packages:
+  - docker
+  - docker-buildx
+  - git
+  - go
+  - protobuf
+  - reuse
+sources:
+  - "https://git.sr.ht/~mpldr/uniview"
+secrets:
+  - ba45943f-f792-4287-87a5-09fdb803a8dd # GitHub SSH Key
+  - fb78c647-e9f5-4922-b804-7c795da4d56a # GitHub known_hosts
+tasks:
+  - prepare: |
+      sudo usermod -aG docker $(whoami)
+      sudo systemctl start docker
+      set +e
+      docker_ps_return=1
+      until [ ${docker_ps_return} -eq 0 ]; do
+        sudo docker ps >/dev/null 2>&1
+        docker_ps_return=$?
+        sleep 1
+      done
+      set -e
+  - build: |
+      cd uniview
+      make
+  - docker-build: |
+      cd uniview
+      docker build .
+  - reuse-compliance: |
+      cd uniview
+      reuse lint
+  - check-authors-file: |
+      cd uniview
+      make AUTHORS
+      if git status --porcelain | grep AUTHORS | grep "^ M" > /dev/null; then
+        echo -e "\n\nAUTHORS file is not up to date!"
+        exit 1
+      fi
+  - mirror-to-github: |
+      cd uniview
+      [ $(git describe HEAD) == $(git describe origin/master) ] || exit 255
+      git clone --mirror https://git.sr.ht/~mpldr/uniview
+      cd uniview.git
+      git push --mirror git@github.com:mpldr/uniview.git

@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 ![Licence: AGPL](https://img.shields.io/badge/-AGPL--3-green?logo=opensourceinitiative&label=License&cacheSeconds=31536000)
 ![Demo available under uv.mpldr.de](https://img.shields.io/badge/-uv.mpldr.de-blue?label=Demo&cacheSeconds=31536000)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/mpldr/uniview)
+[![builds.sr.ht status](https://builds.sr.ht/~mpldr/uniview.svg)](https://builds.sr.ht/~mpldr/uniview?)
 [![REUSE status](https://api.reuse.software/badge/git.sr.ht/~mpldr/uniview)](https://api.reuse.software/info/git.sr.ht/~mpldr/uniview)
 [![Liberapay receiving](https://img.shields.io/liberapay/receives/mpldr)](https://liberapay.com/mpldr)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/mpldr?logo=github&color=lightgrey)](https://github.com/sponsors/mpldr)
