@@ -10,6 +10,7 @@ type Interface interface {
 	LoadFile(string) error
 	Seek(time.Duration) error
 	GetPlaybackPos() (time.Duration, error)
+	GetPauseState() bool
 	NotifySeek() <-chan time.Duration
 	NotifyPause() <-chan bool
 	Quit() <-chan struct{}

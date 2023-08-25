@@ -70,7 +70,6 @@ func (p *MPV) monitor() {
 }
 
 func (p *MPV) pollPause() {
-	var pauseState bool
 	for {
 		<-time.After(50 * time.Millisecond)
 		req := rand.Int()
@@ -80,14 +79,14 @@ func (p *MPV) pollPause() {
 		})
 		res := p.getResponse(req)
 		if pause, ok := res.Data.(bool); ok {
-			if pause != pauseState {
-				pauseState = pause
+			if pause != p.pauseState {
+				p.pauseState = pause
 				if p.dropPause.Load() {
 					p.dropPause.Store(false)
 					continue
 				}
 				select {
-				case p.notifyPause <- pauseState:
+				case p.notifyPause <- p.pauseState:
 				default:
 				}
 			}

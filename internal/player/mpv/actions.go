@@ -69,6 +69,10 @@ func (p *MPV) Seek(ts time.Duration) error {
 	return nil
 }
 
+func (p *MPV) GetPauseState() bool {
+	return p.pauseState
+}
+
 func (p *MPV) GetPlaybackPos() (time.Duration, error) {
 	if p.dead.Load() {
 		return 0, player.ErrPlayerDead

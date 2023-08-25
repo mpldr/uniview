@@ -35,6 +35,7 @@ type MPV struct {
 	notifySeekInternal chan struct{}
 	notifyIdle         chan struct{}
 	commands           chan command
+	pauseState         bool
 
 	dead      *atomic.Bool
 	dropSeek  *atomic.Bool
