@@ -23,6 +23,8 @@ func (p *MPV) monitor() {
 		// message, err := bufio.NewReader(p.conn).ReadBytes('\n')
 		message, err := rd.ReadBytes('\n')
 		if err == io.EOF {
+			p.dead.Store(true)
+			p.quitchan <- struct{}{}
 			return
 		}
 		var res response
