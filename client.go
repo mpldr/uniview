@@ -47,6 +47,7 @@ func startClient(u *url.URL) error {
 	}
 
 	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithBlock())
 	if u.Query().Has("insecure") || insecureByDefault(u.Hostname()) {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
