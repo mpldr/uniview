@@ -9,18 +9,15 @@ import (
 	"os"
 	"path/filepath"
 
+	"git.sr.ht/~mpldr/uniview/internal/buildinfo"
 	"git.sr.ht/~poldi1405/glog"
 	cli "github.com/jawher/mow.cli"
 )
-
-// Version is filled with the programs version at compile time
-var Version = "0.2.1"
 
 func main() {
 	defer glog.PanicHandler()
 	glog.SetLevel(glog.INFO)
 
-	glog.Infof("starting uniview version %s", Version)
 	if filepath.Base(os.Args[0]) == "univiewd" {
 		glog.Debug("starting in server mode")
 		err := startServer()
@@ -33,17 +30,24 @@ func main() {
 	}
 
 	app := cli.App("uniview", "synchronise video playback")
-	app.Spec = "([--insecure] SERVER ROOM FILE) | URL"
+	app.Spec = "([--insecure] SERVER ROOM FILE) | URL | --version"
 
 	var server, room, file, rawurl string
-	var insecure bool
+	var insecure, ver bool
 	app.StringArgPtr(&server, "SERVER", "", "the server to connect to")
 	app.StringArgPtr(&room, "ROOM", "", "the room to join")
 	app.StringArgPtr(&file, "FILE", "", "the file to open")
 	app.BoolOptPtr(&insecure, "i insecure", false, "do not validate the server certificate")
 	app.StringArgPtr(&rawurl, "URL", "", "the uniview:// address to connect to")
+	app.BoolOptPtr(&ver, "v version", false, "show version and quit")
 
 	app.Action = func() {
+		if ver {
+			fmt.Println(buildinfo.BugReportVersion())
+			return
+		}
+		glog.Infof("starting uniview version %s", buildinfo.VersionString())
+
 		var err error
 		var u *url.URL
 		if len(rawurl) == 0 {

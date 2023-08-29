@@ -5,9 +5,11 @@ GO?=$(shell which go)
 BUILD_OPTS?=-trimpath -v
 
 VERSION?=$(shell git describe --always --dirty || echo 0.2.1)
+DISTRIBUTION?=$(shell source /etc/os-release || source /usr/lib/os-release || source /etc/initrd-release && echo -n $$PRETTY_NAME \($$BUILD_ID\) | sed 's/ /_/g')
 
 GO_LDFLAGS:=
-GO_LDFLAGS+=-X main.Version=$(VERSION)
+GO_LDFLAGS+=-X git.sr.ht/~mpldr/uniview/internal/buildinfo.Version=$(VERSION)
+GO_LDFLAGS+=-X git.sr.ht/~mpldr/uniview/internal/buildinfo.BuiltFor=$(DISTRIBUTION)
 GO_LDFLAGS+=$(EXTRA_GO_LDFLAGS)
 
 GOSRC!=find * -type f \( -name '*.go' -and -not -name '*_test.go' \)
@@ -19,7 +21,7 @@ BINDIR?=$(PREFIX)/bin
 
 all: uniview univiewd
 
-uniview: $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go
+uniview: $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go Makefile
 	$(GO) build $(BUILD_OPTS) -ldflags "$(GO_LDFLAGS)" -o $@
 
 univiewd: uniview
