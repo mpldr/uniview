@@ -10,6 +10,7 @@ packages:
   - go
   - protobuf
   - reuse
+  - scdoc
 sources:
   - "https://git.sr.ht/~mpldr/uniview"
 secrets:

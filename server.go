@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"git.sr.ht/~mpldr/uniview/internal/config"
 	"git.sr.ht/~mpldr/uniview/internal/mansion"
 	"git.sr.ht/~mpldr/uniview/internal/server"
 	"git.sr.ht/~mpldr/uniview/protocol"
@@ -57,8 +58,8 @@ func startServer() error {
 	go serverShutdown(sigs, srv, roomMan)
 	signal.Notify(sigs, os.Interrupt)
 
-	glog.Debugf("starting listener on %s:%d", "0.0.0.0", 1558)
-	lis, err := net.Listen("tcp", "0.0.0.0:1558")
+	glog.Debugf("starting listener on %s", config.Server.General.Bind)
+	lis, err := net.Listen("tcp", config.Server.General.Bind)
 	if err != nil {
 		return fmt.Errorf("failed to start listener: %w", err)
 	}

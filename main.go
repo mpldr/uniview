@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"git.sr.ht/~mpldr/uniview/internal/buildinfo"
+	"git.sr.ht/~mpldr/uniview/internal/config"
 	"git.sr.ht/~poldi1405/glog"
 	cli "github.com/jawher/mow.cli"
 )
@@ -20,7 +21,13 @@ func main() {
 
 	if filepath.Base(os.Args[0]) == "univiewd" {
 		glog.Debug("starting in server mode")
-		err := startServer()
+
+		err := config.Load(&config.Server, config.ServerPaths)
+		if err != nil {
+			glog.Warnf("no config loaded: %v", err)
+		}
+
+		err = startServer()
 		if err != nil {
 			glog.Errorf("failed to start server: %v", err)
 			os.Exit(1)

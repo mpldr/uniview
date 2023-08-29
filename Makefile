@@ -19,7 +19,17 @@ DESTDIR?=
 PREFIX?=/usr
 BINDIR?=$(PREFIX)/bin
 
-all: uniview univiewd
+SCDOC_SOURCES:=$(wildcard doc/*.scdoc)
+MAN_TARGETS:=$(subst scdoc,gz,$(SCDOC_SOURCES))
+
+.PHONY: all
+all: uniview univiewd docs
+
+.PHONY: docs
+docs: $(MAN_TARGETS)
+
+doc/%.gz: doc/%.scd
+	scdoc < $< | gzip > $@
 
 uniview: $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go Makefile
 	$(GO) build $(BUILD_OPTS) -ldflags "$(GO_LDFLAGS)" -o $@
@@ -54,3 +64,4 @@ install:
 	install -Dm755 uniview $(DESTDIR)$(BINDIR)/univiewd
 	install -Dm755 contrib/uniview.desktop $(DESTDIR)$(PREFIX)/share/applications/uniview.desktop
 	install -Dm755 contrib/icon.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/uniview.svg
+	install -Dm644 doc/univiewd.toml.5.gz $(DESTDIR)$(PREFIX)/share/man/man5/univiewd.toml.5.gz
