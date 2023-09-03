@@ -9,6 +9,7 @@ packages:
   - git
   - go
   - protobuf
+  - redocly
   - reuse
   - scdoc
 sources:

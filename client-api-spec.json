@@ -1,0 +1,265 @@
+{
+	"openapi": "3.1.0",
+	"x-stoplight": {
+		"id": "7d008xnwc6lx3"
+	},
+	"info": {
+		"title": "Uniview Client",
+		"version": "1.0",
+		"summary": "Interact with your local Uniview client",
+		"description": "",
+		"contact": {
+			"name": "Mailinglist",
+			"url": "https://lists.sr.ht/~mpldr/uniview",
+			"email": "~mpldr/uniview@lists.sr.ht"
+		},
+		"license": {
+			"name": "GNU AGPLv3",
+			"url": "https://www.gnu.org/licenses/agpl.txt"
+		}
+	},
+	"servers": [
+		{
+			"url": "http://[::1]:21558",
+			"description": "Localhost"
+		}
+	],
+	"paths": {
+		"/status": {
+			"parameters": [],
+			"get": {
+				"summary": "Query system status",
+				"operationId": "get-status",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Status"
+								}
+							}
+						}
+					}
+				},
+				"x-stoplight": {
+					"id": "nrhwio4ja82ly"
+				},
+				"description": "Returns information on the client currently used",
+				"tags": [
+					"system"
+				]
+			}
+		},
+		"/player/pause": {
+			"get": {
+				"summary": "retrieve pause state",
+				"tags": [
+					"player"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Pause"
+								}
+							}
+						}
+					}
+				},
+				"operationId": "get-player-pause",
+				"x-stoplight": {
+					"id": "wqlxck8dsj937"
+				},
+				"description": "Query the player state on whether it is currently paused and provides the playback position if it is."
+			},
+			"put": {
+				"summary": "set player pause state",
+				"operationId": "put-player-pause",
+				"responses": {
+					"202": {
+						"description": "Accepted"
+					}
+				},
+				"x-stoplight": {
+					"id": "pi589mrtucfrb"
+				},
+				"description": "Set the player into the given pause state.",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"pause": {
+										"type": "boolean",
+										"x-stoplight": {
+											"id": "d3pf4hc54kpay"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"player"
+				]
+			}
+		},
+		"/player/position": {
+			"get": {
+				"summary": "retrieve current position",
+				"tags": [
+					"player"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PlaybackPosition"
+								}
+							}
+						}
+					}
+				},
+				"operationId": "get-player-position",
+				"x-stoplight": {
+					"id": "94n802ndyy5lh"
+				},
+				"description": "Query the player for its current playback position"
+			},
+			"put": {
+				"summary": "seek to position",
+				"operationId": "put-player-position",
+				"responses": {
+					"202": {
+						"description": "Accepted",
+						"content": {}
+					}
+				},
+				"x-stoplight": {
+					"id": "z7qxd0o29tglu"
+				},
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PlaybackPosition"
+							}
+						}
+					}
+				},
+				"tags": [
+					"player"
+				],
+				"description": "Seek to the specified position."
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"Status": {
+				"title": "Status",
+				"x-stoplight": {
+					"id": "6bbonkr12xyks"
+				},
+				"type": "object",
+				"properties": {
+					"connection": {
+						"x-stoplight": {
+							"id": "jdg3vwpkpauea"
+						},
+						"enum": [
+							"connected",
+							"reconnecting"
+						]
+					},
+					"player": {
+						"type": "string",
+						"x-stoplight": {
+							"id": "9kiwk3ixf1tyw"
+						},
+						"example": "mpv"
+					},
+					"version": {
+						"$ref": "#/components/schemas/Version",
+						"x-stoplight": {
+							"id": "hopeqbp2gbzyu"
+						}
+					}
+				},
+				"description": "Holds information on the currently running client"
+			},
+			"Version": {
+				"title": "Version",
+				"x-stoplight": {
+					"id": "r2et9a12n3936"
+				},
+				"type": "object",
+				"properties": {
+					"major": {
+						"type": "integer",
+						"x-stoplight": {
+							"id": "5hrr3bs0helq2"
+						},
+						"minimum": 0
+					},
+					"minor": {
+						"type": "integer",
+						"x-stoplight": {
+							"id": "zqq3hofl5dyc9"
+						},
+						"minimum": 0
+					},
+					"patch": {
+						"type": "integer",
+						"x-stoplight": {
+							"id": "3a9dei0iedpxq"
+						},
+						"minimum": 0
+					}
+				}
+			},
+			"Pause": {
+				"title": "Pause Information",
+				"x-stoplight": {
+					"id": "fkqm2bjmlh2ax"
+				},
+				"type": "object",
+				"description": "Holds information on the players pause state.",
+				"properties": {
+					"paused": {
+						"type": "boolean",
+						"x-stoplight": {
+							"id": "l7680autlcsgd"
+						}
+					},
+					"paused-at": {
+						"$ref": "#/components/schemas/PlaybackPosition",
+						"x-stoplight": {
+							"id": "k6t5egbawpwfp"
+						}
+					}
+				}
+			},
+			"PlaybackPosition": {
+				"title": "PlaybackPosition",
+				"x-stoplight": {
+					"id": "8gn6x2gwht8hd"
+				},
+				"type": "number",
+				"minimum": 0,
+				"format": "float",
+				"example": 184.32
+			}
+		},
+		"responses": {},
+		"examples": {}
+	},
+	"x-logo": "data:image/svg+xml;base64,PCEtLQpTUERYLUZpbGVDb3B5cmlnaHRUZXh0OiDCqSBNb3JpdHogUG9sZHJhY2sKU1BEWC1MaWNlbnNlLUlkZW50aWZpZXI6IENDLUJZLVNBLTQuMAotLT4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzUgNDAwIj4KCTxkZWZzPgoJCTxtYXNrIGlkPSJhIj4KCQkJPHJlY3Qgd2lkdGg9IjUwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZmIi8+CgkJPC9tYXNrPgoJPC9kZWZzPgoJPGVsbGlwc2UgY3g9IjE1MCIgY3k9IjIwMCIgcng9IjE1MCIgcnk9IjIwMCIvPgoJPGVsbGlwc2UgY3g9IjE1MCIgY3k9IjIwMCIgcng9IjEyNSIgcnk9IjE3NSIgZmlsbD0iI2ZmZiIvPgoJPGVsbGlwc2UgY3g9IjQyNSIgY3k9IjIwMCIgcng9IjE1MCIgcnk9IjIwMCIvPgoJPGVsbGlwc2UgY3g9IjQyNSIgY3k9IjIwMCIgcng9IjEyNSIgcnk9IjE3NSIgZmlsbD0iI2ZmZiIvPgoJPGNpcmNsZSBjeD0iMjg3LjUiIGN5PSIyMDAiIHI9IjgwIi8+Cgk8Y2lyY2xlIGN4PSIyODcuNSIgY3k9IjIwMCIgcj0iNjAiIGZpbGw9IiMyYjcxZjIiLz4KCTxjaXJjbGUgY3g9IjI4Ny41IiBjeT0iMjAwIiByPSI2MCIgZmlsbD0iIzAwQjMzMSIgbWFzaz0idXJsKCNhKSIvPgoJPGNpcmNsZSBjeD0iMjg3LjUiIGN5PSIyMDAiIHI9IjMwIi8+Cjwvc3ZnPgo="
+}

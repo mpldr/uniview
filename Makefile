@@ -31,7 +31,7 @@ docs: $(MAN_TARGETS)
 doc/%.gz: doc/%.scd
 	scdoc < $< | gzip > $@
 
-uniview: $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go Makefile
+uniview: $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go Makefile internal/client/index.html internal/client/api/
 	$(GO) build $(BUILD_OPTS) -ldflags "$(GO_LDFLAGS)" -o $@
 
 univiewd: uniview
@@ -48,6 +48,14 @@ protocol/uniview_grpc.pb.go: protocol/uniview.proto tools/protoc-gen-go-grpc
 		--go-grpc_out=./ \
 		--go-grpc_opt=paths=source_relative \
 		$<
+
+internal/client/api/: client-api-spec.json go.mod
+	@-mkdir -p $@
+	$(GO) run github.com/ogen-go/ogen/cmd/ogen --target internal/client/api/ --clean --no-client $<
+	touch $@
+
+internal/client/index.html: client-api-spec.json
+	redocly build-docs $< --title "Uniview Client API Docs" --disableGoogleFont -o $@
 
 tools/protoc-gen-go: go.mod
 	$(GO) build -o $@ -v google.golang.org/protobuf/cmd/protoc-gen-go

@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"git.sr.ht/~mpldr/uniview/internal/client"
 	"git.sr.ht/~mpldr/uniview/internal/player"
 	"git.sr.ht/~mpldr/uniview/internal/player/mpv"
 	"git.sr.ht/~mpldr/uniview/protocol"
@@ -34,6 +35,8 @@ func startClient(u *url.URL) error {
 		return fmt.Errorf("failed to start mpv: %w", err)
 	}
 	defer p.Close()
+
+	go client.StartRestServer(context.Background(), p)
 
 	glog.Debugf("loading file %q…", u.Query().Get("file"))
 	err = p.LoadFile(u.Query().Get("file"))
