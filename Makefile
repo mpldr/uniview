@@ -19,8 +19,8 @@ DESTDIR?=
 PREFIX?=/usr
 BINDIR?=$(PREFIX)/bin
 
-SCDOC_SOURCES:=$(wildcard doc/*.scdoc)
-MAN_TARGETS:=$(subst scdoc,gz,$(SCDOC_SOURCES))
+SCDOC_SOURCES:=$(wildcard doc/*.scd)
+MAN_TARGETS:=$(subst scd,gz,$(SCDOC_SOURCES))
 
 .PHONY: all
 all: uniview univiewd docs
