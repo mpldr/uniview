@@ -1,8 +1,5 @@
 {
 	"openapi": "3.1.0",
-	"x-stoplight": {
-		"id": "7d008xnwc6lx3"
-	},
 	"info": {
 		"title": "Uniview Client",
 		"version": "1.0",
@@ -42,9 +39,6 @@
 						}
 					}
 				},
-				"x-stoplight": {
-					"id": "nrhwio4ja82ly"
-				},
 				"description": "Returns information on the client currently used",
 				"tags": [
 					"system"
@@ -70,9 +64,6 @@
 					}
 				},
 				"operationId": "get-player-pause",
-				"x-stoplight": {
-					"id": "wqlxck8dsj937"
-				},
 				"description": "Query the player state on whether it is currently paused and provides the playback position if it is."
 			},
 			"put": {
@@ -83,9 +74,6 @@
 						"description": "Accepted"
 					}
 				},
-				"x-stoplight": {
-					"id": "pi589mrtucfrb"
-				},
 				"description": "Set the player into the given pause state.",
 				"requestBody": {
 					"content": {
@@ -94,10 +82,7 @@
 								"type": "object",
 								"properties": {
 									"pause": {
-										"type": "boolean",
-										"x-stoplight": {
-											"id": "d3pf4hc54kpay"
-										}
+										"type": "boolean"
 									}
 								}
 							}
@@ -128,9 +113,6 @@
 					}
 				},
 				"operationId": "get-player-position",
-				"x-stoplight": {
-					"id": "94n802ndyy5lh"
-				},
 				"description": "Query the player for its current playback position"
 			},
 			"put": {
@@ -141,9 +123,6 @@
 						"description": "Accepted",
 						"content": {}
 					}
-				},
-				"x-stoplight": {
-					"id": "z7qxd0o29tglu"
 				},
 				"requestBody": {
 					"content": {
@@ -165,15 +144,9 @@
 		"schemas": {
 			"Status": {
 				"title": "Status",
-				"x-stoplight": {
-					"id": "6bbonkr12xyks"
-				},
 				"type": "object",
 				"properties": {
 					"connection": {
-						"x-stoplight": {
-							"id": "jdg3vwpkpauea"
-						},
 						"enum": [
 							"connected",
 							"reconnecting"
@@ -181,77 +154,47 @@
 					},
 					"player": {
 						"type": "string",
-						"x-stoplight": {
-							"id": "9kiwk3ixf1tyw"
-						},
 						"example": "mpv"
 					},
 					"version": {
-						"$ref": "#/components/schemas/Version",
-						"x-stoplight": {
-							"id": "hopeqbp2gbzyu"
-						}
+						"$ref": "#/components/schemas/Version"
 					}
 				},
 				"description": "Holds information on the currently running client"
 			},
 			"Version": {
 				"title": "Version",
-				"x-stoplight": {
-					"id": "r2et9a12n3936"
-				},
 				"type": "object",
 				"properties": {
 					"major": {
 						"type": "integer",
-						"x-stoplight": {
-							"id": "5hrr3bs0helq2"
-						},
 						"minimum": 0
 					},
 					"minor": {
 						"type": "integer",
-						"x-stoplight": {
-							"id": "zqq3hofl5dyc9"
-						},
 						"minimum": 0
 					},
 					"patch": {
 						"type": "integer",
-						"x-stoplight": {
-							"id": "3a9dei0iedpxq"
-						},
 						"minimum": 0
 					}
 				}
 			},
 			"Pause": {
 				"title": "Pause Information",
-				"x-stoplight": {
-					"id": "fkqm2bjmlh2ax"
-				},
 				"type": "object",
 				"description": "Holds information on the players pause state.",
 				"properties": {
 					"paused": {
-						"type": "boolean",
-						"x-stoplight": {
-							"id": "l7680autlcsgd"
-						}
+						"type": "boolean"
 					},
 					"paused-at": {
-						"$ref": "#/components/schemas/PlaybackPosition",
-						"x-stoplight": {
-							"id": "k6t5egbawpwfp"
-						}
+						"$ref": "#/components/schemas/PlaybackPosition"
 					}
 				}
 			},
 			"PlaybackPosition": {
 				"title": "PlaybackPosition",
-				"x-stoplight": {
-					"id": "8gn6x2gwht8hd"
-				},
 				"type": "number",
 				"minimum": 0,
 				"format": "float",
