@@ -7,6 +7,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,6 +18,7 @@ import (
 
 	"git.sr.ht/~mpldr/uniview/internal/buildinfo"
 	"git.sr.ht/~mpldr/uniview/internal/client/api"
+	"git.sr.ht/~mpldr/uniview/internal/config"
 	"git.sr.ht/~mpldr/uniview/internal/player"
 	"git.sr.ht/~poldi1405/glog"
 	"github.com/ogen-go/ogen/ogenerrors"
@@ -38,6 +41,53 @@ type restServer struct {
 	p player.Interface
 }
 
+// FilesGet implements GET /files operation.
+// List file roots.
+//
+// GET /files
+func (r *restServer) FilesGet(ctx context.Context) ([]string, error) {
+	return config.Client.Media.Directories, nil
+}
+
+// GetFilesRootRelpath implements get-files-root-relpath operation.
+//
+// List files under the given root.
+//
+// GET /files/{root}
+func (r *restServer) GetFilesRootRelpath(_ context.Context, params api.GetFilesRootRelpathParams) (api.GetFilesRootRelpathRes, error) {
+	if params.Root >= len(config.Client.Media.Directories) {
+		return &api.GetFilesRootRelpathNotFound{}, nil
+	}
+
+	rel := "."
+	if params.Relpath.IsSet() {
+		rel = params.Relpath.Value
+	}
+
+	p := path.Join(config.Client.Media.Directories[params.Root], params.Relpath.Value)
+	entries, err := os.ReadDir(p)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list directory: %w", err)
+	}
+
+	var files []api.File
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), ".") {
+			continue // ignore hidden files
+		}
+		files = append(files, api.File{
+			Name:      entry.Name(),
+			Directory: entry.IsDir(),
+		})
+	}
+
+	return &api.Directory{
+		Root:         params.Root,
+		RelativePath: rel,
+		Content:      files,
+	}, nil
+}
+
 // GetPlayerPause implements get-player-pause operation.
 // Query the player state on whether it is currently paused and provides the
 // playback position if it
@@ -47,7 +97,7 @@ type restServer struct {
 func (r *restServer) GetPlayerPause(_ context.Context) (*api.Pause, error) {
 	pause := r.p.GetPauseState()
 	res := &api.Pause{
-		Paused: api.NewOptBool(pause),
+		Paused: pause,
 	}
 	if !pause {
 		return res, nil
@@ -81,7 +131,7 @@ func (r *restServer) GetPlayerPosition(_ context.Context) (api.PlaybackPosition,
 // Returns information on the client currently used.
 //
 // GET /status
-func (r *restServer) GetStatus(_ context.Context) (*api.Status, error) {
+func (r *restServer) GetStatus(_ context.Context) (api.GetStatusRes, error) {
 	re := regexp.MustCompile(`(?m)^.*?(\d)\.(\d)\.(\d)`)
 	ver := buildinfo.VersionString()
 
@@ -96,13 +146,14 @@ func (r *restServer) GetStatus(_ context.Context) (*api.Status, error) {
 		versNumbers = append(versNumbers, part)
 	}
 
-	return &api.Status{
-		Player: api.NewOptString("mpv"),
-		Version: api.NewOptVersion(api.Version{
-			Major: api.NewOptInt(versNumbers[0]),
-			Minor: api.NewOptInt(versNumbers[1]),
-			Patch: api.NewOptInt(versNumbers[2]),
-		}),
+	return &api.GetStatusOK{
+		Connection: api.StatusConnectionOk,
+		Player:     "mpv",
+		Version: api.Version{
+			Major: versNumbers[0],
+			Minor: versNumbers[1],
+			Patch: versNumbers[2],
+		},
 	}, nil
 }
 

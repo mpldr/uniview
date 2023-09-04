@@ -34,10 +34,49 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Status"
+								},
+								"examples": {
+									"example": {
+										"value": {
+											"connection": "ok",
+											"player": "mpv",
+											"version": {
+												"major": 0,
+												"minor": 2,
+												"patch": 1
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "Service Unavailable",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Status"
+								},
+								"examples": {
+									"example": {
+										"value": {
+											"connection": "connecting",
+											"player": "mpv",
+											"version": {
+												"major": 0,
+												"minor": 2,
+												"patch": 1
+											}
+										}
+									}
 								}
 							}
 						}
 					}
+				},
+				"x-stoplight": {
+					"id": "nrhwio4ja82ly"
 				},
 				"description": "Returns information on the client currently used",
 				"tags": [
@@ -64,6 +103,9 @@
 					}
 				},
 				"operationId": "get-player-pause",
+				"x-stoplight": {
+					"id": "wqlxck8dsj937"
+				},
 				"description": "Query the player state on whether it is currently paused and provides the playback position if it is."
 			},
 			"put": {
@@ -74,6 +116,9 @@
 						"description": "Accepted"
 					}
 				},
+				"x-stoplight": {
+					"id": "pi589mrtucfrb"
+				},
 				"description": "Set the player into the given pause state.",
 				"requestBody": {
 					"content": {
@@ -82,7 +127,10 @@
 								"type": "object",
 								"properties": {
 									"pause": {
-										"type": "boolean"
+										"type": "boolean",
+										"x-stoplight": {
+											"id": "d3pf4hc54kpay"
+										}
 									}
 								}
 							}
@@ -113,6 +161,9 @@
 					}
 				},
 				"operationId": "get-player-position",
+				"x-stoplight": {
+					"id": "94n802ndyy5lh"
+				},
 				"description": "Query the player for its current playback position"
 			},
 			"put": {
@@ -123,6 +174,9 @@
 						"description": "Accepted",
 						"content": {}
 					}
+				},
+				"x-stoplight": {
+					"id": "z7qxd0o29tglu"
 				},
 				"requestBody": {
 					"content": {
@@ -138,67 +192,229 @@
 				],
 				"description": "Seek to the specified position."
 			}
+		},
+		"/files": {
+			"get": {
+				"summary": "list file roots",
+				"description": "",
+				"operationId": "",
+				"tags": [
+					"filesysten"
+				],
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								},
+								"examples": {
+									"example": {
+										"value": [
+											"/home/user/Videos",
+											"/mnt/media/Anime"
+										]
+									}
+								}
+							}
+						},
+						"description": "OK"
+					}
+				}
+			}
+		},
+		"/files/{root}": {
+			"get": {
+				"summary": "list files under the given root",
+				"description": "",
+				"operationId": "get-files-root-relpath",
+				"tags": [
+					"filesysten"
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "relpath",
+						"description": "relative path to search",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Directory"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"404": {
+						"description": "Not Found"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"in": "path",
+					"name": "root",
+					"description": "id of the file root to check",
+					"schema": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"required": true
+				}
+			]
 		}
 	},
 	"components": {
 		"schemas": {
 			"Status": {
 				"title": "Status",
+				"x-stoplight": {
+					"id": "6bbonkr12xyks"
+				},
 				"type": "object",
 				"properties": {
 					"connection": {
+						"type": "string",
 						"enum": [
-							"connected",
-							"reconnecting"
+							"ok",
+							"connecting"
 						]
 					},
 					"player": {
 						"type": "string",
+						"x-stoplight": {
+							"id": "9kiwk3ixf1tyw"
+						},
 						"example": "mpv"
 					},
 					"version": {
 						"$ref": "#/components/schemas/Version"
 					}
 				},
-				"description": "Holds information on the currently running client"
+				"description": "Holds information on the currently running client",
+				"required": [
+					"version",
+					"connection",
+					"player"
+				]
 			},
 			"Version": {
 				"title": "Version",
+				"x-stoplight": {
+					"id": "r2et9a12n3936"
+				},
 				"type": "object",
 				"properties": {
 					"major": {
 						"type": "integer",
+						"x-stoplight": {
+							"id": "5hrr3bs0helq2"
+						},
 						"minimum": 0
 					},
 					"minor": {
 						"type": "integer",
+						"x-stoplight": {
+							"id": "zqq3hofl5dyc9"
+						},
 						"minimum": 0
 					},
 					"patch": {
 						"type": "integer",
+						"x-stoplight": {
+							"id": "3a9dei0iedpxq"
+						},
 						"minimum": 0
+					},
+					"suffix": {
+						"type": "string"
 					}
-				}
+				},
+				"required": [
+					"major",
+					"minor",
+					"patch"
+				]
 			},
 			"Pause": {
 				"title": "Pause Information",
+				"x-stoplight": {
+					"id": "fkqm2bjmlh2ax"
+				},
 				"type": "object",
 				"description": "Holds information on the players pause state.",
 				"properties": {
 					"paused": {
-						"type": "boolean"
+						"type": "boolean",
+						"x-stoplight": {
+							"id": "l7680autlcsgd"
+						}
 					},
 					"paused-at": {
 						"$ref": "#/components/schemas/PlaybackPosition"
 					}
-				}
+				},
+				"required": [
+					"paused"
+				]
 			},
 			"PlaybackPosition": {
 				"title": "PlaybackPosition",
+				"x-stoplight": {
+					"id": "8gn6x2gwht8hd"
+				},
 				"type": "number",
 				"minimum": 0,
 				"format": "float",
 				"example": 184.32
+			},
+			"File": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"directory": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"name",
+					"directory"
+				]
+			},
+			"Directory": {
+				"type": "object",
+				"properties": {
+					"root": {
+						"type": "integer"
+					},
+					"relative_path": {
+						"type": "string"
+					},
+					"content": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/File"
+						}
+					}
+				},
+				"required": [
+					"root",
+					"relative_path",
+					"content"
+				]
 			}
 		},
 		"responses": {},

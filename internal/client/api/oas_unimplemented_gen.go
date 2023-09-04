@@ -13,6 +13,24 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// FilesGet implements GET /files operation.
+//
+// List file roots.
+//
+// GET /files
+func (UnimplementedHandler) FilesGet(ctx context.Context) (r []string, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetFilesRootRelpath implements get-files-root-relpath operation.
+//
+// List files under the given root.
+//
+// GET /files/{root}
+func (UnimplementedHandler) GetFilesRootRelpath(ctx context.Context, params GetFilesRootRelpathParams) (r GetFilesRootRelpathRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetPlayerPause implements get-player-pause operation.
 //
 // Query the player state on whether it is currently paused and provides the playback position if it
@@ -37,7 +55,7 @@ func (UnimplementedHandler) GetPlayerPosition(ctx context.Context) (r PlaybackPo
 // Returns information on the client currently used.
 //
 // GET /status
-func (UnimplementedHandler) GetStatus(ctx context.Context) (r *Status, _ error) {
+func (UnimplementedHandler) GetStatus(ctx context.Context) (r GetStatusRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

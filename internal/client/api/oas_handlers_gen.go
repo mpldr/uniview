@@ -18,6 +18,192 @@ import (
 	"github.com/ogen-go/ogen/otelogen"
 )
 
+// handleFilesGetRequest handles GET /files operation.
+//
+// List file roots.
+//
+// GET /files
+func (s *Server) handleFilesGetRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	var otelAttrs []attribute.KeyValue
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "FilesGet",
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err error
+	)
+
+	var response []string
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "FilesGet",
+			OperationID:   "",
+			Body:          nil,
+			Params:        middleware.Parameters{},
+			Raw:           r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = struct{}
+			Response = []string
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.FilesGet(ctx)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.FilesGet(ctx)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeFilesGetResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
+// handleGetFilesRootRelpathRequest handles get-files-root-relpath operation.
+//
+// List files under the given root.
+//
+// GET /files/{root}
+func (s *Server) handleGetFilesRootRelpathRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("get-files-root-relpath"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/files/{root}"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetFilesRootRelpath",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "GetFilesRootRelpath",
+			ID:   "get-files-root-relpath",
+		}
+	)
+	params, err := decodeGetFilesRootRelpathParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var response GetFilesRootRelpathRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "GetFilesRootRelpath",
+			OperationID:   "get-files-root-relpath",
+			Body:          nil,
+			Params: middleware.Parameters{
+				{
+					Name: "relpath",
+					In:   "query",
+				}: params.Relpath,
+				{
+					Name: "root",
+					In:   "path",
+				}: params.Root,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetFilesRootRelpathParams
+			Response = GetFilesRootRelpathRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetFilesRootRelpathParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetFilesRootRelpath(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetFilesRootRelpath(ctx, params)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeGetFilesRootRelpathResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handleGetPlayerPauseRequest handles get-player-pause operation.
 //
 // Query the player state on whether it is currently paused and provides the playback position if it
@@ -226,7 +412,7 @@ func (s *Server) handleGetStatusRequest(args [0]string, argsEscaped bool, w http
 		err error
 	)
 
-	var response *Status
+	var response GetStatusRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:       ctx,
@@ -240,7 +426,7 @@ func (s *Server) handleGetStatusRequest(args [0]string, argsEscaped bool, w http
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = *Status
+			Response = GetStatusRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,

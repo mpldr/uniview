@@ -3,8 +3,86 @@
 package api
 
 import (
-	"github.com/go-faster/jx"
+	"github.com/go-faster/errors"
 )
+
+// Ref: #/components/schemas/Directory
+type Directory struct {
+	Root         int    `json:"root"`
+	RelativePath string `json:"relative_path"`
+	Content      []File `json:"content"`
+}
+
+// GetRoot returns the value of Root.
+func (s *Directory) GetRoot() int {
+	return s.Root
+}
+
+// GetRelativePath returns the value of RelativePath.
+func (s *Directory) GetRelativePath() string {
+	return s.RelativePath
+}
+
+// GetContent returns the value of Content.
+func (s *Directory) GetContent() []File {
+	return s.Content
+}
+
+// SetRoot sets the value of Root.
+func (s *Directory) SetRoot(val int) {
+	s.Root = val
+}
+
+// SetRelativePath sets the value of RelativePath.
+func (s *Directory) SetRelativePath(val string) {
+	s.RelativePath = val
+}
+
+// SetContent sets the value of Content.
+func (s *Directory) SetContent(val []File) {
+	s.Content = val
+}
+
+func (*Directory) getFilesRootRelpathRes() {}
+
+// Ref: #/components/schemas/File
+type File struct {
+	Name      string `json:"name"`
+	Directory bool   `json:"directory"`
+}
+
+// GetName returns the value of Name.
+func (s *File) GetName() string {
+	return s.Name
+}
+
+// GetDirectory returns the value of Directory.
+func (s *File) GetDirectory() bool {
+	return s.Directory
+}
+
+// SetName sets the value of Name.
+func (s *File) SetName(val string) {
+	s.Name = val
+}
+
+// SetDirectory sets the value of Directory.
+func (s *File) SetDirectory(val bool) {
+	s.Directory = val
+}
+
+// GetFilesRootRelpathNotFound is response for GetFilesRootRelpath operation.
+type GetFilesRootRelpathNotFound struct{}
+
+func (*GetFilesRootRelpathNotFound) getFilesRootRelpathRes() {}
+
+type GetStatusOK Status
+
+func (*GetStatusOK) getStatusRes() {}
+
+type GetStatusServiceUnavailable Status
+
+func (*GetStatusServiceUnavailable) getStatusRes() {}
 
 // NewOptBool returns new OptBool with value set to v.
 func NewOptBool(v bool) OptBool {
@@ -46,52 +124,6 @@ func (o OptBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBool) Or(d bool) bool {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptInt returns new OptInt with value set to v.
-func NewOptInt(v int) OptInt {
-	return OptInt{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptInt is optional int.
-type OptInt struct {
-	Value int
-	Set   bool
-}
-
-// IsSet returns true if OptInt was set.
-func (o OptInt) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptInt) Reset() {
-	var v int
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptInt) SetTo(v int) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptInt) Get() (v int, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -236,61 +268,15 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
-// NewOptVersion returns new OptVersion with value set to v.
-func NewOptVersion(v Version) OptVersion {
-	return OptVersion{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptVersion is optional Version.
-type OptVersion struct {
-	Value Version
-	Set   bool
-}
-
-// IsSet returns true if OptVersion was set.
-func (o OptVersion) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptVersion) Reset() {
-	var v Version
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptVersion) SetTo(v Version) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptVersion) Get() (v Version, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptVersion) Or(d Version) Version {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // Holds information on the players pause state.
 // Ref: #/components/schemas/Pause
 type Pause struct {
-	Paused        OptBool             `json:"paused"`
+	Paused        bool                `json:"paused"`
 	PausedMinusAt OptPlaybackPosition `json:"paused-at"`
 }
 
 // GetPaused returns the value of Paused.
-func (s *Pause) GetPaused() OptBool {
+func (s *Pause) GetPaused() bool {
 	return s.Paused
 }
 
@@ -300,7 +286,7 @@ func (s *Pause) GetPausedMinusAt() OptPlaybackPosition {
 }
 
 // SetPaused sets the value of Paused.
-func (s *Pause) SetPaused(val OptBool) {
+func (s *Pause) SetPaused(val bool) {
 	s.Paused = val
 }
 
@@ -334,74 +320,118 @@ type PutPlayerPositionAccepted struct{}
 // Holds information on the currently running client.
 // Ref: #/components/schemas/Status
 type Status struct {
-	Connection jx.Raw     `json:"connection"`
-	Player     OptString  `json:"player"`
-	Version    OptVersion `json:"version"`
+	Connection StatusConnection `json:"connection"`
+	Player     string           `json:"player"`
+	Version    Version          `json:"version"`
 }
 
 // GetConnection returns the value of Connection.
-func (s *Status) GetConnection() jx.Raw {
+func (s *Status) GetConnection() StatusConnection {
 	return s.Connection
 }
 
 // GetPlayer returns the value of Player.
-func (s *Status) GetPlayer() OptString {
+func (s *Status) GetPlayer() string {
 	return s.Player
 }
 
 // GetVersion returns the value of Version.
-func (s *Status) GetVersion() OptVersion {
+func (s *Status) GetVersion() Version {
 	return s.Version
 }
 
 // SetConnection sets the value of Connection.
-func (s *Status) SetConnection(val jx.Raw) {
+func (s *Status) SetConnection(val StatusConnection) {
 	s.Connection = val
 }
 
 // SetPlayer sets the value of Player.
-func (s *Status) SetPlayer(val OptString) {
+func (s *Status) SetPlayer(val string) {
 	s.Player = val
 }
 
 // SetVersion sets the value of Version.
-func (s *Status) SetVersion(val OptVersion) {
+func (s *Status) SetVersion(val Version) {
 	s.Version = val
+}
+
+type StatusConnection string
+
+const (
+	StatusConnectionOk         StatusConnection = "ok"
+	StatusConnectionConnecting StatusConnection = "connecting"
+)
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StatusConnection) MarshalText() ([]byte, error) {
+	switch s {
+	case StatusConnectionOk:
+		return []byte(s), nil
+	case StatusConnectionConnecting:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StatusConnection) UnmarshalText(data []byte) error {
+	switch StatusConnection(data) {
+	case StatusConnectionOk:
+		*s = StatusConnectionOk
+		return nil
+	case StatusConnectionConnecting:
+		*s = StatusConnectionConnecting
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/Version
 type Version struct {
-	Major OptInt `json:"major"`
-	Minor OptInt `json:"minor"`
-	Patch OptInt `json:"patch"`
+	Major  int       `json:"major"`
+	Minor  int       `json:"minor"`
+	Patch  int       `json:"patch"`
+	Suffix OptString `json:"suffix"`
 }
 
 // GetMajor returns the value of Major.
-func (s *Version) GetMajor() OptInt {
+func (s *Version) GetMajor() int {
 	return s.Major
 }
 
 // GetMinor returns the value of Minor.
-func (s *Version) GetMinor() OptInt {
+func (s *Version) GetMinor() int {
 	return s.Minor
 }
 
 // GetPatch returns the value of Patch.
-func (s *Version) GetPatch() OptInt {
+func (s *Version) GetPatch() int {
 	return s.Patch
 }
 
+// GetSuffix returns the value of Suffix.
+func (s *Version) GetSuffix() OptString {
+	return s.Suffix
+}
+
 // SetMajor sets the value of Major.
-func (s *Version) SetMajor(val OptInt) {
+func (s *Version) SetMajor(val int) {
 	s.Major = val
 }
 
 // SetMinor sets the value of Minor.
-func (s *Version) SetMinor(val OptInt) {
+func (s *Version) SetMinor(val int) {
 	s.Minor = val
 }
 
 // SetPatch sets the value of Patch.
-func (s *Version) SetPatch(val OptInt) {
+func (s *Version) SetPatch(val int) {
 	s.Patch = val
+}
+
+// SetSuffix sets the value of Suffix.
+func (s *Version) SetSuffix(val OptString) {
+	s.Suffix = val
 }

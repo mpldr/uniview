@@ -8,3 +8,7 @@ var ServerPaths = []string{
 	"/config/univiewd.toml",
 	"/etc/univiewd.toml",
 }
+
+var ClientPaths = []string{
+	"./uniview.toml",
+}

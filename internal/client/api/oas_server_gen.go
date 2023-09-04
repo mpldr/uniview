@@ -8,6 +8,18 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// FilesGet implements GET /files operation.
+	//
+	// List file roots.
+	//
+	// GET /files
+	FilesGet(ctx context.Context) ([]string, error)
+	// GetFilesRootRelpath implements get-files-root-relpath operation.
+	//
+	// List files under the given root.
+	//
+	// GET /files/{root}
+	GetFilesRootRelpath(ctx context.Context, params GetFilesRootRelpathParams) (GetFilesRootRelpathRes, error)
 	// GetPlayerPause implements get-player-pause operation.
 	//
 	// Query the player state on whether it is currently paused and provides the playback position if it
@@ -26,7 +38,7 @@ type Handler interface {
 	// Returns information on the client currently used.
 	//
 	// GET /status
-	GetStatus(ctx context.Context) (*Status, error)
+	GetStatus(ctx context.Context) (GetStatusRes, error)
 	// PutPlayerPause implements put-player-pause operation.
 	//
 	// Set the player into the given pause state.

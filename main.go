@@ -53,9 +53,14 @@ func main() {
 			fmt.Println(buildinfo.BugReportVersion())
 			return
 		}
+
+		err := config.Load(&config.Client, config.ClientPaths)
+		if err != nil {
+			glog.Warnf("no config loaded: %v", err)
+		}
+
 		glog.Infof("starting uniview version %s", buildinfo.VersionString())
 
-		var err error
 		var u *url.URL
 		if len(rawurl) == 0 {
 			rawurl = fmt.Sprintf("uniview://%s/%s", server, room)

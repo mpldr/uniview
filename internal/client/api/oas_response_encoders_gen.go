@@ -11,6 +11,48 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+func encodeFilesGetResponse(response []string, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := jx.GetEncoder()
+	e.ArrStart()
+	for _, elem := range response {
+		e.Str(elem)
+	}
+	e.ArrEnd()
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+	return nil
+}
+
+func encodeGetFilesRootRelpathResponse(response GetFilesRootRelpathRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *Directory:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *GetFilesRootRelpathNotFound:
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeGetPlayerPauseResponse(response *Pause, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
@@ -37,17 +79,35 @@ func encodeGetPlayerPositionResponse(response PlaybackPosition, w http.ResponseW
 	return nil
 }
 
-func encodeGetStatusResponse(response *Status, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
+func encodeGetStatusResponse(response GetStatusRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *GetStatusOK:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
 
-	e := jx.GetEncoder()
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	case *GetStatusServiceUnavailable:
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(503)
+		span.SetStatus(codes.Error, http.StatusText(503))
+
+		e := jx.GetEncoder()
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
 	}
-	return nil
 }
 
 func encodePutPlayerPauseResponse(response *PutPlayerPauseAccepted, w http.ResponseWriter, span trace.Span) error {
