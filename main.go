@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"git.sr.ht/~mpldr/uniview/internal/buildinfo"
+	"git.sr.ht/~mpldr/uniview/internal/client"
 	"git.sr.ht/~mpldr/uniview/internal/config"
 	"git.sr.ht/~poldi1405/glog"
 	cli "github.com/jawher/mow.cli"
@@ -80,7 +81,7 @@ func main() {
 		}
 
 		glog.Debugf("connecting to %s", u)
-		err = startClient(u)
+		err = client.StartClient(u)
 		if err != nil {
 			glog.Errorf("failed to start server: %v", err)
 			os.Exit(1)

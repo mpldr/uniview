@@ -24,7 +24,7 @@ import (
 	"github.com/ogen-go/ogen/ogenerrors"
 )
 
-func StartRestServer(ctx context.Context, p player.Interface) error {
+func StartRestServer(_ context.Context, p player.Interface) error {
 	r := &restServer{p}
 
 	srv, err := api.NewServer(r, api.WithErrorHandler(ogenerrors.DefaultErrorHandler))
@@ -34,7 +34,14 @@ func StartRestServer(ctx context.Context, p player.Interface) error {
 
 	wrapper := NewDocWrapper(srv)
 
-	return http.ListenAndServe("[::1]:21558", wrapper)
+	httpSrv := &http.Server{
+		Addr:    "[::1]:21558",
+		Handler: wrapper,
+	}
+
+	shutdownFuncs = append(shutdownFuncs, httpSrv.Shutdown)
+
+	return httpSrv.ListenAndServe()
 }
 
 type restServer struct {
