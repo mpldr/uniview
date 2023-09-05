@@ -106,8 +106,22 @@ func StartClient(u *url.URL) error {
 	}
 
 	glog.Debug("waiting for remote events…")
-	go receiveEvents(ctx, p, stream)
-	go sendPlayerEvents(ctx, p, stream)
+	go func() {
+		receiveEvents(ctx, p, stream)
+		select {
+		case <-ctx.Done():
+		default:
+			cancel()
+		}
+	}()
+	go func() {
+		sendPlayerEvents(ctx, p, stream)
+		select {
+		case <-ctx.Done():
+		default:
+			cancel()
+		}
+	}()
 
 	glog.Debug("waiting for shutdown")
 	<-waitForExit
