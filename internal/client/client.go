@@ -65,7 +65,9 @@ func StartClient(u *url.URL) error {
 	}
 
 	glog.Debugf("connecting to remote…")
-	gconn, err := grpc.Dial(u.Host, opts...)
+	dialCtx, dialCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	gconn, err := grpc.DialContext(dialCtx, u.Host, opts...)
+	dialCancel()
 	if err != nil {
 		return fmt.Errorf("failed to connect to server %q: %w", u.Host, err)
 	}
