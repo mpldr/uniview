@@ -142,7 +142,8 @@ func (r *restServer) GetStatus(_ context.Context) (api.GetStatusRes, error) {
 	re := regexp.MustCompile(`(?m)^.*?(\d)\.(\d)\.(\d)`)
 	ver := buildinfo.VersionString()
 
-	vers := strings.SplitN(re.FindString(ver), ".", 3)
+	version := re.FindString(ver)
+	vers := strings.SplitN(version, ".", 3)
 	for i := len(vers); i < 3; i++ {
 		vers = append(vers, "-1")
 	}
@@ -153,6 +154,8 @@ func (r *restServer) GetStatus(_ context.Context) (api.GetStatusRes, error) {
 		versNumbers = append(versNumbers, part)
 	}
 
+	suffix := strings.TrimPrefix(buildinfo.VersionString(), version)
+
 	return &api.GetStatusOK{
 		Connection: api.StatusConnectionOk,
 		Player:     r.p.Name(),
@@ -160,6 +163,10 @@ func (r *restServer) GetStatus(_ context.Context) (api.GetStatusRes, error) {
 			Major: versNumbers[0],
 			Minor: versNumbers[1],
 			Patch: versNumbers[2],
+			Suffix: api.OptString{
+				Value: suffix,
+				Set:   len(suffix) > 0,
+			},
 		},
 	}, nil
 }
