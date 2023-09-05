@@ -80,9 +80,6 @@
 						}
 					}
 				},
-				"x-stoplight": {
-					"id": "nrhwio4ja82ly"
-				},
 				"description": "Returns information on the client currently used.",
 				"tags": [
 					"system"
@@ -108,9 +105,6 @@
 					}
 				},
 				"operationId": "get-player-pause",
-				"x-stoplight": {
-					"id": "wqlxck8dsj937"
-				},
 				"description": "Query the player state on whether it is currently paused and provides the playback position if it is."
 			},
 			"put": {
@@ -120,9 +114,6 @@
 					"202": {
 						"description": "Accepted"
 					}
-				},
-				"x-stoplight": {
-					"id": "pi589mrtucfrb"
 				},
 				"description": "Set the player into the given pause state.",
 				"requestBody": {
@@ -159,9 +150,6 @@
 					}
 				},
 				"operationId": "get-player-position",
-				"x-stoplight": {
-					"id": "94n802ndyy5lh"
-				},
 				"description": "Query the player for its current playback position"
 			},
 			"put": {
@@ -172,9 +160,6 @@
 						"description": "Accepted",
 						"content": {}
 					}
-				},
-				"x-stoplight": {
-					"id": "z7qxd0o29tglu"
 				},
 				"requestBody": {
 					"content": {
@@ -279,9 +264,6 @@
 		"schemas": {
 			"Status": {
 				"title": "Status",
-				"x-stoplight": {
-					"id": "6bbonkr12xyks"
-				},
 				"type": "object",
 				"properties": {
 					"connection": {
@@ -295,9 +277,6 @@
 					},
 					"player": {
 						"type": "string",
-						"x-stoplight": {
-							"id": "9kiwk3ixf1tyw"
-						},
 						"example": "mpv",
 						"description": "the used player interface"
 					},
@@ -315,32 +294,20 @@
 			},
 			"Version": {
 				"title": "Version",
-				"x-stoplight": {
-					"id": "r2et9a12n3936"
-				},
 				"type": "object",
 				"properties": {
 					"major": {
 						"type": "integer",
-						"x-stoplight": {
-							"id": "5hrr3bs0helq2"
-						},
 						"minimum": 0,
 						"description": "the major version number"
 					},
 					"minor": {
 						"type": "integer",
-						"x-stoplight": {
-							"id": "zqq3hofl5dyc9"
-						},
 						"minimum": 0,
 						"description": "the minor version number"
 					},
 					"patch": {
 						"type": "integer",
-						"x-stoplight": {
-							"id": "3a9dei0iedpxq"
-						},
 						"minimum": 0,
 						"description": "the patchlevel"
 					},
@@ -358,17 +325,11 @@
 			},
 			"Pause": {
 				"title": "Pause Information",
-				"x-stoplight": {
-					"id": "fkqm2bjmlh2ax"
-				},
 				"type": "object",
 				"description": "Holds information on the players pause state.",
 				"properties": {
 					"paused": {
 						"type": "boolean",
-						"x-stoplight": {
-							"id": "l7680autlcsgd"
-						},
 						"description": "the paused state"
 					},
 					"paused-at": {
@@ -382,9 +343,6 @@
 			},
 			"PlaybackPosition": {
 				"title": "PlaybackPosition",
-				"x-stoplight": {
-					"id": "8gn6x2gwht8hd"
-				},
 				"type": "number",
 				"minimum": 0,
 				"format": "float",
