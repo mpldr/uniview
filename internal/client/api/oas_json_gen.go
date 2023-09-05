@@ -839,6 +839,8 @@ func (s *StatusConnection) Decode(d *jx.Decoder) error {
 		*s = StatusConnectionOk
 	case StatusConnectionConnecting:
 		*s = StatusConnectionConnecting
+	case StatusConnectionDisconnected:
+		*s = StatusConnectionDisconnected
 	default:
 		*s = StatusConnection(v)
 	}

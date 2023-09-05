@@ -4,11 +4,16 @@
 		"title": "Uniview Client",
 		"version": "1.0",
 		"summary": "Interact with your local Uniview client",
-		"description": "",
+		"description": "This API is intended to allow controlling the uniview client from other programs to make UI development easier.",
 		"contact": {
 			"name": "Mailinglist",
 			"url": "https://lists.sr.ht/~mpldr/uniview",
 			"email": "~mpldr/uniview@lists.sr.ht"
+		},
+		"x-logo": {
+			"href": "https://sr.ht/~mpldr/uniview",
+			"url": "https://raw.githubusercontent.com/mpldr/cdn/main/icon.webp",
+			"altText": "Uniview Logo"
 		},
 		"license": {
 			"name": "GNU AGPLv3",
@@ -78,7 +83,7 @@
 				"x-stoplight": {
 					"id": "nrhwio4ja82ly"
 				},
-				"description": "Returns information on the client currently used",
+				"description": "Returns information on the client currently used.",
 				"tags": [
 					"system"
 				]
@@ -124,15 +129,8 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"type": "object",
-								"properties": {
-									"pause": {
-										"type": "boolean",
-										"x-stoplight": {
-											"id": "d3pf4hc54kpay"
-										}
-									}
-								}
+								"type": "boolean",
+								"description": "set pause state to this value"
 							}
 						}
 					}
@@ -209,8 +207,10 @@
 								"schema": {
 									"type": "array",
 									"items": {
-										"type": "string"
-									}
+										"type": "string",
+										"description": "the root path"
+									},
+									"description": "a list of available roots"
 								},
 								"examples": {
 									"example": {
@@ -288,18 +288,22 @@
 						"type": "string",
 						"enum": [
 							"ok",
-							"connecting"
-						]
+							"connecting",
+							"disconnected"
+						],
+						"description": "the currect connection status"
 					},
 					"player": {
 						"type": "string",
 						"x-stoplight": {
 							"id": "9kiwk3ixf1tyw"
 						},
-						"example": "mpv"
+						"example": "mpv",
+						"description": "the used player interface"
 					},
 					"version": {
-						"$ref": "#/components/schemas/Version"
+						"$ref": "#/components/schemas/Version",
+						"description": "the program version"
 					}
 				},
 				"description": "Holds information on the currently running client",
@@ -321,31 +325,36 @@
 						"x-stoplight": {
 							"id": "5hrr3bs0helq2"
 						},
-						"minimum": 0
+						"minimum": 0,
+						"description": "the major version number"
 					},
 					"minor": {
 						"type": "integer",
 						"x-stoplight": {
 							"id": "zqq3hofl5dyc9"
 						},
-						"minimum": 0
+						"minimum": 0,
+						"description": "the minor version number"
 					},
 					"patch": {
 						"type": "integer",
 						"x-stoplight": {
 							"id": "3a9dei0iedpxq"
 						},
-						"minimum": 0
+						"minimum": 0,
+						"description": "the patchlevel"
 					},
 					"suffix": {
-						"type": "string"
+						"type": "string",
+						"description": "a potential suffix, if provided"
 					}
 				},
 				"required": [
 					"major",
 					"minor",
 					"patch"
-				]
+				],
+				"description": "A semver compatible version"
 			},
 			"Pause": {
 				"title": "Pause Information",
@@ -359,10 +368,12 @@
 						"type": "boolean",
 						"x-stoplight": {
 							"id": "l7680autlcsgd"
-						}
+						},
+						"description": "the paused state"
 					},
 					"paused-at": {
-						"$ref": "#/components/schemas/PlaybackPosition"
+						"$ref": "#/components/schemas/PlaybackPosition",
+						"description": "the timestamp the video was paused at"
 					}
 				},
 				"required": [
@@ -377,16 +388,19 @@
 				"type": "number",
 				"minimum": 0,
 				"format": "float",
-				"example": 184.32
+				"example": 184.32,
+				"description": "the current playback position"
 			},
 			"File": {
 				"type": "object",
 				"properties": {
 					"name": {
-						"type": "string"
+						"type": "string",
+						"description": "the filename"
 					},
 					"directory": {
-						"type": "boolean"
+						"type": "boolean",
+						"description": "true if the file is a directory"
 					}
 				},
 				"required": [
@@ -398,16 +412,19 @@
 				"type": "object",
 				"properties": {
 					"root": {
-						"type": "integer"
+						"type": "integer",
+						"description": "the id of the root"
 					},
 					"relative_path": {
-						"type": "string"
+						"type": "string",
+						"description": "the path relative to the root to reach this directory"
 					},
 					"content": {
 						"type": "array",
 						"items": {
 							"$ref": "#/components/schemas/File"
-						}
+						},
+						"description": "the files contained in this directory"
 					}
 				},
 				"required": [
@@ -418,7 +435,11 @@
 			}
 		},
 		"responses": {},
-		"examples": {}
+		"examples": {},
+		"parameters": {}
 	},
-	"x-logo": "data:image/svg+xml;base64,PCEtLQpTUERYLUZpbGVDb3B5cmlnaHRUZXh0OiDCqSBNb3JpdHogUG9sZHJhY2sKU1BEWC1MaWNlbnNlLUlkZW50aWZpZXI6IENDLUJZLVNBLTQuMAotLT4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzUgNDAwIj4KCTxkZWZzPgoJCTxtYXNrIGlkPSJhIj4KCQkJPHJlY3Qgd2lkdGg9IjUwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZmIi8+CgkJPC9tYXNrPgoJPC9kZWZzPgoJPGVsbGlwc2UgY3g9IjE1MCIgY3k9IjIwMCIgcng9IjE1MCIgcnk9IjIwMCIvPgoJPGVsbGlwc2UgY3g9IjE1MCIgY3k9IjIwMCIgcng9IjEyNSIgcnk9IjE3NSIgZmlsbD0iI2ZmZiIvPgoJPGVsbGlwc2UgY3g9IjQyNSIgY3k9IjIwMCIgcng9IjE1MCIgcnk9IjIwMCIvPgoJPGVsbGlwc2UgY3g9IjQyNSIgY3k9IjIwMCIgcng9IjEyNSIgcnk9IjE3NSIgZmlsbD0iI2ZmZiIvPgoJPGNpcmNsZSBjeD0iMjg3LjUiIGN5PSIyMDAiIHI9IjgwIi8+Cgk8Y2lyY2xlIGN4PSIyODcuNSIgY3k9IjIwMCIgcj0iNjAiIGZpbGw9IiMyYjcxZjIiLz4KCTxjaXJjbGUgY3g9IjI4Ny41IiBjeT0iMjAwIiByPSI2MCIgZmlsbD0iIzAwQjMzMSIgbWFzaz0idXJsKCNhKSIvPgoJPGNpcmNsZSBjeD0iMjg3LjUiIGN5PSIyMDAiIHI9IjMwIi8+Cjwvc3ZnPgo="
+	"externalDocs": {
+		"description": "Wiki",
+		"url": "https://man.sr.ht/~mpldr/uniview"
+	}
 }

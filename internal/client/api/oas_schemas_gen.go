@@ -8,9 +8,12 @@ import (
 
 // Ref: #/components/schemas/Directory
 type Directory struct {
-	Root         int    `json:"root"`
+	// The id of the root.
+	Root int `json:"root"`
+	// The path relative to the root to reach this directory.
 	RelativePath string `json:"relative_path"`
-	Content      []File `json:"content"`
+	// The files contained in this directory.
+	Content []File `json:"content"`
 }
 
 // GetRoot returns the value of Root.
@@ -47,8 +50,10 @@ func (*Directory) getFilesRootRelpathRes() {}
 
 // Ref: #/components/schemas/File
 type File struct {
-	Name      string `json:"name"`
-	Directory bool   `json:"directory"`
+	// The filename.
+	Name string `json:"name"`
+	// True if the file is a directory.
+	Directory bool `json:"directory"`
 }
 
 // GetName returns the value of Name.
@@ -271,7 +276,9 @@ func (o OptString) Or(d string) string {
 // Holds information on the players pause state.
 // Ref: #/components/schemas/Pause
 type Pause struct {
-	Paused        bool                `json:"paused"`
+	// The paused state.
+	Paused bool `json:"paused"`
+	// The timestamp the video was paused at.
 	PausedMinusAt OptPlaybackPosition `json:"paused-at"`
 }
 
@@ -320,9 +327,12 @@ type PutPlayerPositionAccepted struct{}
 // Holds information on the currently running client.
 // Ref: #/components/schemas/Status
 type Status struct {
+	// The currect connection status.
 	Connection StatusConnection `json:"connection"`
-	Player     string           `json:"player"`
-	Version    Version          `json:"version"`
+	// The used player interface.
+	Player string `json:"player"`
+	// The program version.
+	Version Version `json:"version"`
 }
 
 // GetConnection returns the value of Connection.
@@ -355,11 +365,13 @@ func (s *Status) SetVersion(val Version) {
 	s.Version = val
 }
 
+// The currect connection status.
 type StatusConnection string
 
 const (
-	StatusConnectionOk         StatusConnection = "ok"
-	StatusConnectionConnecting StatusConnection = "connecting"
+	StatusConnectionOk           StatusConnection = "ok"
+	StatusConnectionConnecting   StatusConnection = "connecting"
+	StatusConnectionDisconnected StatusConnection = "disconnected"
 )
 
 // MarshalText implements encoding.TextMarshaler.
@@ -368,6 +380,8 @@ func (s StatusConnection) MarshalText() ([]byte, error) {
 	case StatusConnectionOk:
 		return []byte(s), nil
 	case StatusConnectionConnecting:
+		return []byte(s), nil
+	case StatusConnectionDisconnected:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -383,16 +397,24 @@ func (s *StatusConnection) UnmarshalText(data []byte) error {
 	case StatusConnectionConnecting:
 		*s = StatusConnectionConnecting
 		return nil
+	case StatusConnectionDisconnected:
+		*s = StatusConnectionDisconnected
+		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
 
+// A semver compatible version.
 // Ref: #/components/schemas/Version
 type Version struct {
-	Major  int       `json:"major"`
-	Minor  int       `json:"minor"`
-	Patch  int       `json:"patch"`
+	// The major version number.
+	Major int `json:"major"`
+	// The minor version number.
+	Minor int `json:"minor"`
+	// The patchlevel.
+	Patch int `json:"patch"`
+	// A potential suffix, if provided.
 	Suffix OptString `json:"suffix"`
 }
 

@@ -122,6 +122,8 @@ func (s StatusConnection) Validate() error {
 		return nil
 	case "connecting":
 		return nil
+	case "disconnected":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
