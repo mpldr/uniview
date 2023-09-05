@@ -16,4 +16,5 @@ type Interface interface {
 	Quit() <-chan struct{}
 	Close()
 	PlayerReady() <-chan struct{}
+	Name() string
 }

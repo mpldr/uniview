@@ -124,6 +124,10 @@ outer:
 	return p, nil
 }
 
+func (p *MPV) Name() string {
+	return "mpv"
+}
+
 func (p *MPV) Close() {
 	if p.dead.Load() {
 		return

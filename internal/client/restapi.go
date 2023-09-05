@@ -148,7 +148,7 @@ func (r *restServer) GetStatus(_ context.Context) (api.GetStatusRes, error) {
 
 	return &api.GetStatusOK{
 		Connection: api.StatusConnectionOk,
-		Player:     "mpv",
+		Player:     r.p.Name(),
 		Version: api.Version{
 			Major: versNumbers[0],
 			Minor: versNumbers[1],
