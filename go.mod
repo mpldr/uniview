@@ -12,6 +12,7 @@ require (
 	github.com/go-faster/errors v0.6.1
 	github.com/go-faster/jx v1.1.0
 	github.com/jawher/mow.cli v1.2.0
+	github.com/josephspurrier/goversioninfo v1.4.0
 	github.com/ogen-go/ogen v0.73.0
 	github.com/pelletier/go-toml/v2 v2.1.0
 	go.opentelemetry.io/otel v1.16.0
@@ -24,6 +25,7 @@ require (
 )
 
 require (
+	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect

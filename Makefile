@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 GO?=$(shell which go)
+GOEXE:=$(shell go env GOEXE)
 BUILD_OPTS?=-trimpath -v
 
 VERSION?=$(shell git describe --always --dirty || echo 0.2.1)
@@ -23,7 +24,7 @@ SCDOC_SOURCES:=$(wildcard doc/*.scd)
 MAN_TARGETS:=$(subst scd,gz,$(SCDOC_SOURCES))
 
 .PHONY: all
-all: uniview univiewd docs
+all: uniview$(GOEXE) univiewd$(GOEXE) docs
 
 .PHONY: docs
 docs: $(MAN_TARGETS)
@@ -31,10 +32,10 @@ docs: $(MAN_TARGETS)
 doc/%.gz: doc/%.scd
 	scdoc < $< | gzip > $@
 
-uniview: $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go Makefile internal/client/index.html internal/client/api/
+uniview$(GOEXE): $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go Makefile internal/client/index.html internal/client/api/
 	$(GO) build $(BUILD_OPTS) -ldflags "$(GO_LDFLAGS)" -o $@
 
-univiewd: uniview
+univiewd$(GOEXE): uniview$(GOEXE)
 	ln -f $< $@
 
 protocol/uniview.pb.go: protocol/uniview.proto tools/protoc-gen-go

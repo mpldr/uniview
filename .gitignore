@@ -4,3 +4,8 @@
 tools/*
 /uniview*
 doc/*.gz
+windows/*
+*.exe
+*.pem
+*.ico
+*.syso
