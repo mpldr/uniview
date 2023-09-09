@@ -44,13 +44,13 @@ type Handler interface {
 	// Set the player into the given pause state.
 	//
 	// PUT /player/pause
-	PutPlayerPause(ctx context.Context, req OptPutPlayerPauseReq) error
+	PutPlayerPause(ctx context.Context, req bool) error
 	// PutPlayerPosition implements put-player-position operation.
 	//
 	// Seek to the specified position.
 	//
 	// PUT /player/position
-	PutPlayerPosition(ctx context.Context, req OptPlaybackPosition) error
+	PutPlayerPosition(ctx context.Context, req PlaybackPosition) error
 }
 
 // Server implements http server based on OpenAPI v3 specification and

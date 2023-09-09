@@ -527,7 +527,7 @@ func (s *Server) handlePutPlayerPauseRequest(args [0]string, argsEscaped bool, w
 		}
 
 		type (
-			Request  = OptPutPlayerPauseReq
+			Request  = bool
 			Params   = struct{}
 			Response = *PutPlayerPauseAccepted
 		)
@@ -630,7 +630,7 @@ func (s *Server) handlePutPlayerPositionRequest(args [0]string, argsEscaped bool
 		}
 
 		type (
-			Request  = OptPlaybackPosition
+			Request  = PlaybackPosition
 			Params   = struct{}
 			Response = *PutPlayerPositionAccepted
 		)

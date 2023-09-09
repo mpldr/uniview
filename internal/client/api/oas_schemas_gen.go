@@ -89,52 +89,6 @@ type GetStatusServiceUnavailable Status
 
 func (*GetStatusServiceUnavailable) getStatusRes() {}
 
-// NewOptBool returns new OptBool with value set to v.
-func NewOptBool(v bool) OptBool {
-	return OptBool{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptBool is optional bool.
-type OptBool struct {
-	Value bool
-	Set   bool
-}
-
-// IsSet returns true if OptBool was set.
-func (o OptBool) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptBool) Reset() {
-	var v bool
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptBool) SetTo(v bool) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptBool) Get() (v bool, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptBool) Or(d bool) bool {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptPlaybackPosition returns new OptPlaybackPosition with value set to v.
 func NewOptPlaybackPosition(v PlaybackPosition) OptPlaybackPosition {
 	return OptPlaybackPosition{
@@ -175,52 +129,6 @@ func (o OptPlaybackPosition) Get() (v PlaybackPosition, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptPlaybackPosition) Or(d PlaybackPosition) PlaybackPosition {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptPutPlayerPauseReq returns new OptPutPlayerPauseReq with value set to v.
-func NewOptPutPlayerPauseReq(v PutPlayerPauseReq) OptPutPlayerPauseReq {
-	return OptPutPlayerPauseReq{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptPutPlayerPauseReq is optional PutPlayerPauseReq.
-type OptPutPlayerPauseReq struct {
-	Value PutPlayerPauseReq
-	Set   bool
-}
-
-// IsSet returns true if OptPutPlayerPauseReq was set.
-func (o OptPutPlayerPauseReq) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptPutPlayerPauseReq) Reset() {
-	var v PutPlayerPauseReq
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptPutPlayerPauseReq) SetTo(v PutPlayerPauseReq) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptPutPlayerPauseReq) Get() (v PutPlayerPauseReq, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptPutPlayerPauseReq) Or(d PutPlayerPauseReq) PutPlayerPauseReq {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -306,20 +214,6 @@ type PlaybackPosition float32
 
 // PutPlayerPauseAccepted is response for PutPlayerPause operation.
 type PutPlayerPauseAccepted struct{}
-
-type PutPlayerPauseReq struct {
-	Pause OptBool `json:"pause"`
-}
-
-// GetPause returns the value of Pause.
-func (s *PutPlayerPauseReq) GetPause() OptBool {
-	return s.Pause
-}
-
-// SetPause sets the value of Pause.
-func (s *PutPlayerPauseReq) SetPause(val OptBool) {
-	s.Pause = val
-}
 
 // PutPlayerPositionAccepted is response for PutPlayerPosition operation.
 type PutPlayerPositionAccepted struct{}

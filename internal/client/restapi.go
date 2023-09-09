@@ -176,13 +176,9 @@ func (r *restServer) GetStatus(_ context.Context) (api.GetStatusRes, error) {
 // Set the player into the given pause state.
 //
 // PUT /player/pause
-func (r *restServer) PutPlayerPause(_ context.Context, req api.OptPutPlayerPauseReq) error {
-	if !req.Value.Pause.IsSet() {
-		glog.Warn("api: no pause value set. bailing.")
-		return nil
-	}
-	glog.Debugf("api: setting pause state to %t", req.Value.Pause.Value)
-	return r.p.Pause(req.Value.Pause.Value)
+func (r *restServer) PutPlayerPause(_ context.Context, req bool) error {
+	glog.Debugf("api: setting pause state to %t", req)
+	return r.p.Pause(req)
 }
 
 // PutPlayerPosition implements put-player-position operation.
@@ -190,11 +186,7 @@ func (r *restServer) PutPlayerPause(_ context.Context, req api.OptPutPlayerPause
 // Seek to the specified position.
 //
 // PUT /player/position
-func (r *restServer) PutPlayerPosition(_ context.Context, req api.OptPlaybackPosition) error {
-	if !req.IsSet() {
-		glog.Warn("api: no seek timestamp set. bailing.")
-		return nil
-	}
-	glog.Debugf("api: seek to %s", time.Duration(req.Value)*time.Millisecond)
-	return r.p.Seek(time.Duration(req.Value * api.PlaybackPosition(time.Second)))
+func (r *restServer) PutPlayerPosition(_ context.Context, req api.PlaybackPosition) error {
+	glog.Debugf("api: seek to %s", time.Duration(req)*time.Millisecond)
+	return r.p.Seek(time.Duration(req * api.PlaybackPosition(time.Second)))
 }

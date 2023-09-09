@@ -64,7 +64,7 @@ func (UnimplementedHandler) GetStatus(ctx context.Context) (r GetStatusRes, _ er
 // Set the player into the given pause state.
 //
 // PUT /player/pause
-func (UnimplementedHandler) PutPlayerPause(ctx context.Context, req OptPutPlayerPauseReq) error {
+func (UnimplementedHandler) PutPlayerPause(ctx context.Context, req bool) error {
 	return ht.ErrNotImplemented
 }
 
@@ -73,6 +73,6 @@ func (UnimplementedHandler) PutPlayerPause(ctx context.Context, req OptPutPlayer
 // Seek to the specified position.
 //
 // PUT /player/position
-func (UnimplementedHandler) PutPlayerPosition(ctx context.Context, req OptPlaybackPosition) error {
+func (UnimplementedHandler) PutPlayerPosition(ctx context.Context, req PlaybackPosition) error {
 	return ht.ErrNotImplemented
 }

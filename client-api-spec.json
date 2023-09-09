@@ -98,7 +98,8 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Pause"
+									"$ref": "#/components/schemas/Pause",
+									"description": "the pause state"
 								}
 							}
 						}
@@ -124,7 +125,8 @@
 								"description": "set pause state to this value"
 							}
 						}
-					}
+					},
+					"required": true
 				},
 				"tags": [
 					"player"
@@ -168,7 +170,8 @@
 								"$ref": "#/components/schemas/PlaybackPosition"
 							}
 						}
-					}
+					},
+					"required": true
 				},
 				"tags": [
 					"player"
