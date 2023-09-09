@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"git.sr.ht/~mpldr/uniview/internal/client/api"
 	"git.sr.ht/~mpldr/uniview/internal/player"
 	"git.sr.ht/~mpldr/uniview/internal/player/mpv"
 	"git.sr.ht/~mpldr/uniview/protocol"
@@ -44,7 +45,8 @@ func StartClient(u *url.URL) error {
 	}
 	defer p.Close()
 
-	go StartRestServer(context.Background(), p)
+	status := api.StatusConnectionConnecting
+	go StartRestServer(context.Background(), p, &status)
 
 	glog.Debugf("loading file %q…", u.Query().Get("file"))
 	err = p.LoadFile(u.Query().Get("file"))
@@ -72,6 +74,8 @@ func StartClient(u *url.URL) error {
 		return fmt.Errorf("failed to connect to server %q: %w", u.Host, err)
 	}
 	defer gconn.Close()
+
+	status = api.StatusConnectionOk
 
 	glog.Debug("requesting handle…")
 	cl := protocol.NewUniViewClient(gconn)

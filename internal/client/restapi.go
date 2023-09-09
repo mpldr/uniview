@@ -24,8 +24,8 @@ import (
 	"github.com/ogen-go/ogen/ogenerrors"
 )
 
-func StartRestServer(_ context.Context, p player.Interface) error {
-	r := &restServer{p}
+func StartRestServer(_ context.Context, p player.Interface, status *api.StatusConnection) error {
+	r := &restServer{p, status}
 
 	srv, err := api.NewServer(r, api.WithErrorHandler(ogenerrors.DefaultErrorHandler))
 	if err != nil {
@@ -45,7 +45,8 @@ func StartRestServer(_ context.Context, p player.Interface) error {
 }
 
 type restServer struct {
-	p player.Interface
+	p      player.Interface
+	status *api.StatusConnection
 }
 
 // FilesGet implements GET /files operation.
@@ -155,20 +156,38 @@ func (r *restServer) GetStatus(_ context.Context) (api.GetStatusRes, error) {
 	}
 
 	suffix := strings.TrimPrefix(buildinfo.VersionString(), version)
+	status := *r.status
 
-	return &api.GetStatusOK{
-		Connection: api.StatusConnectionOk,
-		Player:     r.p.Name(),
-		Version: api.Version{
-			Major: versNumbers[0],
-			Minor: versNumbers[1],
-			Patch: versNumbers[2],
-			Suffix: api.OptString{
-				Value: suffix,
-				Set:   len(suffix) > 0,
+	switch status {
+	case api.StatusConnectionOk:
+		return &api.GetStatusOK{
+			Connection: status,
+			Player:     r.p.Name(),
+			Version: api.Version{
+				Major: versNumbers[0],
+				Minor: versNumbers[1],
+				Patch: versNumbers[2],
+				Suffix: api.OptString{
+					Value: suffix,
+					Set:   len(suffix) > 0,
+				},
 			},
-		},
-	}, nil
+		}, nil
+	default:
+		return &api.GetStatusServiceUnavailable{
+			Connection: status,
+			Player:     r.p.Name(),
+			Version: api.Version{
+				Major: versNumbers[0],
+				Minor: versNumbers[1],
+				Patch: versNumbers[2],
+				Suffix: api.OptString{
+					Value: suffix,
+					Set:   len(suffix) > 0,
+				},
+			},
+		}, nil
+	}
 }
 
 // PutPlayerPause implements put-player-pause operation.
