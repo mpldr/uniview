@@ -113,15 +113,45 @@ Section "un.Server"
 	Delete "$INSTDIR\univiewd.exe"
 SectionEnd
 
-Section "mpv" SectionMPV
+Section /o "mpv (recommended)" SectionMPV
+	SectionInstType ${IT_FULL} ${IT_TYPICAL}
+	SetOutPath "$INSTDIR\player\mpv\"
+
+	InitPluginsDir
+
+	inetc::get https://github.com/mpvnet-player/mpv.net/releases/download/v6.0.4.0-stable/mpv.net-v6.0.4.0-stable.zip $Temp\mpv.zip
+	Pop $0
+	StrCmp $0 "OK" dlsucc
+
+	MessageBox MB_ICONEXCLAMATION "Download failed: $R0"
+	Quit
+
+dlsucc:
+	nsisunz::UnzipToLog "$Temp\mpv.zip" "$INSTDIR\player\mpv\"
+
+	Pop $0
+	StrCmp $0 "success" ok
+	MessageBox MB_ICONEXCLAMATION "Extraction failed: $0"
+ok:
+SectionEnd
+
+Section /o "VLC (not recommended)" SectionVLC
+	SectionInstType ${IT_FULL}
+	InitPluginsDir
 	SetOutPath "$INSTDIR\player\"
-	File "${PWD}\mpv\mpv.exe"
-	File "${PWD}\mpv\d3dcompiler_43.dll"
+
+	inetc::get https://portableapps.com/redir2/?a=VLCPortable&s=s&d=pa&f=VLCPortable_3.0.18.paf.exe $TEMP\vlc.exe
+	Pop $0
+	StrCmp $0 "OK" dlsucc
+
+	MessageBox MB_ICONEXCLAMATION "Download failed: $R0"
+	Quit
+dlsucc:
 SectionEnd
 
 ; Modern install component descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-	!insertmacro MUI_DESCRIPTION_TEXT ${Section1} ""
+!insertmacro MUI_DESCRIPTION_TEXT ${Section1} ""
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;Uninstall section
