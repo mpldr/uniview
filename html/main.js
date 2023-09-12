@@ -47,7 +47,10 @@ function lock() {
 }
 
 window.onload = function() {
-	let connTest = (total, delay) => {
+	let connTest = (total, delay, initial) => {
+		if(initial) {
+			window.location.href = "uniview://"+location.host+"/"+encodeURI(document.getElementById("roomNumber").value)+"#"+encodeURI(document.getElementById("password").value);
+		}
 		lock();
 		// Perform resource check at regular intervals
 		const interval = setInterval(checkServer, delay);
@@ -59,8 +62,8 @@ window.onload = function() {
 			unlock();
 		}, total);
 	}
-	document.getElementById('connectButton').addEventListener('click', () => {connTest(3000, 200);});
-	document.getElementById('retryConnection').addEventListener('click', () => {connTest(3000, 200);});
+	document.getElementById('roomSelection').addEventListener('submit', () => {connTest(3000, 200, true);});
+	document.getElementById('retryConnection').addEventListener('click', () => {connTest(3000, 200, false);});
 	document.getElementById('closeX').addEventListener('click', () => {document.getElementById("connection-dialog").close()});
 	document.getElementById('closeButton').addEventListener('click', () => {document.getElementById("connection-dialog").close()});
 }
