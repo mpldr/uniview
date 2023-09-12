@@ -20,7 +20,7 @@ function checkServer() {
 				window.location.href = '/room';
 			}
 		})
-		.catch()
+		.catch(()=>{})
 }
 
 function showError() {
@@ -57,6 +57,7 @@ window.onload = function() {
 		}, total);
 	}
 	document.getElementById('connectButton').addEventListener('click', () => {connTest(3000, 200);});
-
 	document.getElementById('retryConnection').addEventListener('click', () => {connTest(3000, 200);});
+	document.getElementById('closeX').addEventListener('click', () => {document.getElementById("connection-dialog").close()});
+	document.getElementById('closeButton').addEventListener('click', () => {document.getElementById("connection-dialog").close()});
 }
