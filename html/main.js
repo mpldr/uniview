@@ -1,3 +1,6 @@
+// © donuts-are-good & Moritz Poldrack
+// SPDX-License-Identifier: BSD-4-Clause
+
 function createStatusCircle(color) {
 	let circle = document.createElement('div');
 	circle.className = 'status-circle';

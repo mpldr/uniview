@@ -1,5 +1,8 @@
 module webinterface
 
+// SPDX-FileCopyrightText: © nobody
+// SPDX-License-Identifier: CC0-1.0
+
 go 1.21.0
 
 require github.com/tdewolff/minify/v2 v2.12.9
