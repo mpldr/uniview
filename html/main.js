@@ -51,6 +51,7 @@ window.onload = function() {
 
 		// Stop checking after 3 seconds (3000 milliseconds)
 		setTimeout(() => {
+			clearInterval(interval);
 			showError();
 			unlock();
 		}, total);
