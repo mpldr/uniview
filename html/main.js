@@ -64,6 +64,5 @@ window.onload = function() {
 	}
 	document.getElementById('roomSelection').addEventListener('submit', () => {connTest(3000, 200, true);});
 	document.getElementById('retryConnection').addEventListener('click', () => {connTest(3000, 200, false);});
-	document.getElementById('closeX').addEventListener('click', () => {document.getElementById("connection-dialog").close()});
 	document.getElementById('closeButton').addEventListener('click', () => {document.getElementById("connection-dialog").close()});
 }
