@@ -32,7 +32,7 @@ docs: $(MAN_TARGETS)
 doc/%.gz: doc/%.scd
 	scdoc < $< | gzip > $@
 
-uniview$(GOEXE): $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go Makefile internal/client/index.html internal/client/api/
+uniview$(GOEXE): $(GOSRC) protocol/uniview.pb.go protocol/uniview_grpc.pb.go Makefile internal/client/index.html internal/client/api/ webinterface/dist
 	$(GO) build $(BUILD_OPTS) -ldflags "$(GO_LDFLAGS)" -o $@
 
 univiewd$(GOEXE): uniview$(GOEXE)
@@ -66,6 +66,10 @@ tools/protoc-gen-go-grpc: go.mod
 
 AUTHORS: .git/index
 	git log '--pretty=format:%an%n%(trailers:key=co-authored-by,valueonly)' | sed -e 's/ <.*//' | sort -f | uniq | tail -n+2 > $@
+
+.PHONY: webinterface/dist
+webinterface/dist:
+	$(MAKE) -C webinterface dist
 
 .PHONY: install
 install:
