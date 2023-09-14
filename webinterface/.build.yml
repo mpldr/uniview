@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: © nobody
+# SPDX-License-Identifier: CC0-1.0
+
+---
+image: archlinux
+packages:
+  - git
+  - go
+  - reuse
+sources:
+  - "https://git.sr.ht/~mpldr/uniview-webinterface"
+secrets:
+  - ba45943f-f792-4287-87a5-09fdb803a8dd # GitHub SSH Key
+  - fb78c647-e9f5-4922-b804-7c795da4d56a # GitHub known_hosts
+tasks:
+  - build: |
+      cd uniview-webinterface
+      make
+  - reuse-compliance: |
+      cd uniview-webinterface
+      reuse lint

@@ -1,0 +1,84 @@
+<!--
+© donuts-are-good & Moritz Poldrack
+SPDX-License-Identifier: BSD-4-Clause
+-->
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Uniview Lobby</title>
+		<link href="/bootstrap.min.css" rel="stylesheet">
+		<link rel="icon" href="/logo.svg" type="image/svg+xml">
+		<style>
+			.full-height {
+				height: 100vh;
+			}
+			.logo-placeholder {
+				width: 256px;
+				height: 256px;
+				background-color: #e9ecef;
+				margin-bottom: 20px;
+			}
+			dialog {
+				border-style: none;
+				background-color: transparent;
+			}
+			.hide {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="d-flex justify-content-center align-items-center full-height">
+			<div>
+				<p>
+				<img src="logo.svg"/>
+				</p>
+				<form action="#" id="roomSelection">
+					<div class="mb-3">
+						<label for="roomNumber" class="form-label">Room No.</label>
+						<input type="text" class="form-control" id="roomNumber" required>
+					</div>
+					<div class="mb-3">
+						<label for="password" class="form-label">Optional Password</label>
+						<input type="password" class="form-control" id="password">
+					</div>
+					<button type="submit" id="connectButton" class="btn btn-primary">
+						<span id="spinner" class="spinner-border spinner-border-sm hide" role="status" aria-hidden="true"></span>
+						Submit
+					</button>
+				</form>
+			</div>
+		</div>
+		<dialog id="connection-dialog">
+			<div class="modal" id="errorModal" aria-labelledby="errorModalLabel" style="display:block">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="errorModalLabel">Oops... that's not how it's supposed to go</h5>
+						</div>
+						<div class="modal-body">
+							Please make sure that:
+							<ul>
+								<li>uniview is installed</li>
+								<li>confirmation prompts are accepted</li>
+								<li>you are connected to the network</li>
+							</ul>
+						</div>
+						<div class="modal-footer">
+							<button type="button" id="retryConnection" class="btn btn-primary">
+								<span id="spinner" class="spinner-border spinner-border-sm hide" role="status" aria-hidden="true"></span>
+								Check again
+							</button>
+							<button type="button" id="closeButton" class="btn btn-secondary">Cancel</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</dialog>
+		</div>
+		<script src="/main.js"></script>
+	</body>
+</html>
