@@ -140,6 +140,54 @@ function playFile(root, path) {
 		})
 }
 
+function showConnected() {
+	document.getElementById("connected").classList.add("show");
+	setTimeout(function(){document.getElementById("connected").classList.remove("show")},3000);
+}
+
+function checkServer() {
+	// Make a GET request to your API endpoint
+	fetch('http://localhost:21558/status')
+		.then(response => {
+			if (response.status === 200) {
+				if(
+					document.getElementById("disconnectError").classList.contains("show")||
+					document.getElementById("degradedWarn").classList.contains("show")
+				){
+					showConnected();
+					unlock()
+				}
+				document.getElementById("disconnectError").classList.remove("show");
+				document.getElementById("degradedWarn").classList.remove("show");
+			}else{
+				document.getElementById("disconnectError").classList.remove("show");
+				document.getElementById("degradedWarn").classList.add("show");
+				lock();
+			}
+		})
+		.catch(()=>{
+			document.getElementById("disconnectError").classList.add("show");
+			document.getElementById("degradedWarn").classList.remove("show");
+			lock();
+		})
+}
+
+function lock() {
+	document.getElementById("videoSelect").disabled = true;
+	document.getElementById("rootSelect").disabled = true;
+	document.getElementById("listloader").classList.add("hide");
+	document.getElementById("filelist").classList.add("hide");
+	document.getElementById("selectError").classList.remove("hide");
+}
+
+function unlock() {
+	document.getElementById("videoSelect").disabled = false;
+	document.getElementById("rootSelect").disabled = false;
+	document.getElementById("selectError").classList.add("hide");
+	document.getElementById("fileTree").close();
+}
+
 window.onload = function() {
+	setInterval(checkServer, 1000);
 	document.getElementById('rootSelect').addEventListener('select', () => {listDirectory(document.getElementById("rootSelect").selectedIndex, ".")});
 }

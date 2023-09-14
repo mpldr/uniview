@@ -30,7 +30,7 @@
 		<div class="d-flex justify-content-center align-items-center full-height">
 			<div>
 				<div class="mb-3">
-					<button class="btn btn-primary" onclick="openFileDialog()">Select Video</button>
+					<button id="videoSelect" class="btn btn-primary" onclick="openFileDialog()">Select Video</button>
 				</div>
 				<ul class="list-group" id="playlist"></ul>
 			</div>
@@ -53,11 +53,37 @@
 									<span class="visually-hidden">Loading...</span>
 								</div>
 							</div>
+							<div class="alert alert-danger d-flex align-items-center hide" id="selectError" role="alert">
+								<div>
+									This element is currently unavailable.
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</dialog>
+		<div id="disconnectError" class="toast align-items-center text-bg-danger border-0 position-fixed bottom-0 start-50 translate-middle-x mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="d-flex">
+				<div class="toast-body">
+					Can't connect to local uniview!
+				</div>
+			</div>
+		</div>
+		<div id="degradedWarn" class="toast align-items-center text-bg-warning border-0 position-fixed bottom-0 start-50 translate-middle-x mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="d-flex">
+				<div class="toast-body">
+					The uniview client is not ready!
+				</div>
+			</div>
+		</div>
+		<div id="connected" class="toast align-items-center text-bg-success border-0 position-fixed bottom-0 start-50 translate-middle-x mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="d-flex">
+				<div class="toast-body">
+					Connected to uniview!
+				</div>
+			</div>
+		</div>
 	</body>
 	<script src="/room.js"></script>
 </html>
