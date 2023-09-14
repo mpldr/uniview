@@ -6,4 +6,4 @@ package templates
 import "embed"
 
 //go:embed dist/*
-var templates embed.FS
+var Templates embed.FS
