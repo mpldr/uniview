@@ -261,6 +261,45 @@
 					"required": true
 				}
 			]
+		},
+		"/player/start": {
+			"post": {
+				"summary": "start playback of a video",
+				"description": "",
+				"operationId": "",
+				"tags": [
+					"player"
+				],
+				"parameters": [],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"oneOf": [
+									{
+										"$ref": "#/components/schemas/VideoFile"
+									},
+									{
+										"$ref": "#/components/schemas/VideoStream"
+									}
+								]
+							}
+						}
+					},
+					"description": "start playback of a file"
+				},
+				"responses": {
+					"202": {
+						"description": "Accepted"
+					},
+					"400": {
+						"description": "Bad Request"
+					},
+					"404": {
+						"description": "Not Found"
+					}
+				}
+			}
 		}
 	},
 	"components": {
@@ -393,6 +432,28 @@
 					"relative_path",
 					"content"
 				]
+			},
+			"VideoFile": {
+				"type": "object",
+				"properties": {
+					"root": {
+						"type": "integer",
+						"minimum": 0,
+						"description": "the root the file is under"
+					},
+					"relativePath": {
+						"type": "string",
+						"description": "the relative path to the file"
+					}
+				},
+				"required": [
+					"root",
+					"relativePath"
+				]
+			},
+			"VideoStream": {
+				"type": "string",
+				"description": "the URL to play"
 			}
 		},
 		"responses": {},

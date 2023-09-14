@@ -457,6 +457,104 @@ func (s *Server) handleGetStatusRequest(args [0]string, argsEscaped bool, w http
 	}
 }
 
+// handlePlayerStartPostRequest handles POST /player/start operation.
+//
+// Start playback of a video.
+//
+// POST /player/start
+func (s *Server) handlePlayerStartPostRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	var otelAttrs []attribute.KeyValue
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "PlayerStartPost",
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	s.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: "PlayerStartPost",
+			ID:   "",
+		}
+	)
+	request, close, err := s.decodePlayerStartPostRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response PlayerStartPostRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:       ctx,
+			OperationName: "PlayerStartPost",
+			OperationID:   "",
+			Body:          request,
+			Params:        middleware.Parameters{},
+			Raw:           r,
+		}
+
+		type (
+			Request  = OptPlayerStartPostReq
+			Params   = struct{}
+			Response = PlayerStartPostRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.PlayerStartPost(ctx, request)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.PlayerStartPost(ctx, request)
+	}
+	if err != nil {
+		recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodePlayerStartPostResponse(response, w, span); err != nil {
+		recordError("EncodeResponse", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+}
+
 // handlePutPlayerPauseRequest handles put-player-pause operation.
 //
 // Set the player into the given pause state.

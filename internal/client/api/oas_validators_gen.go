@@ -86,6 +86,20 @@ func (s PlaybackPosition) Validate() error {
 	return nil
 }
 
+func (s PlayerStartPostReq) Validate() error {
+	switch s.Type {
+	case VideoFilePlayerStartPostReq:
+		if err := s.VideoFile.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case VideoStreamPlayerStartPostReq:
+		return nil // no validation needed
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
 func (s *Status) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
@@ -188,6 +202,34 @@ func (s *Version) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "patch",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *VideoFile) Validate() error {
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.Int{
+			MinSet:        true,
+			Min:           0,
+			MaxSet:        false,
+			Max:           0,
+			MinExclusive:  false,
+			MaxExclusive:  false,
+			MultipleOfSet: false,
+			MultipleOf:    0,
+		}).Validate(int64(s.Root)); err != nil {
+			return errors.Wrap(err, "int")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "root",
 			Error: err,
 		})
 	}

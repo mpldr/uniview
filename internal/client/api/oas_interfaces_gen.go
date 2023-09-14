@@ -8,3 +8,7 @@ type GetFilesRootRelpathRes interface {
 type GetStatusRes interface {
 	getStatusRes()
 }
+
+type PlayerStartPostRes interface {
+	playerStartPostRes()
+}

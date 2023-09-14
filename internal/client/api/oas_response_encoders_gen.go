@@ -110,6 +110,31 @@ func encodeGetStatusResponse(response GetStatusRes, w http.ResponseWriter, span 
 	}
 }
 
+func encodePlayerStartPostResponse(response PlayerStartPostRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *PlayerStartPostAccepted:
+		w.WriteHeader(202)
+		span.SetStatus(codes.Ok, http.StatusText(202))
+
+		return nil
+
+	case *PlayerStartPostBadRequest:
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		return nil
+
+	case *PlayerStartPostNotFound:
+		w.WriteHeader(404)
+		span.SetStatus(codes.Error, http.StatusText(404))
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodePutPlayerPauseResponse(response *PutPlayerPauseAccepted, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(202)
 	span.SetStatus(codes.Ok, http.StatusText(202))

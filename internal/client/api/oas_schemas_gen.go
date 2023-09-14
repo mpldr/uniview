@@ -135,6 +135,52 @@ func (o OptPlaybackPosition) Or(d PlaybackPosition) PlaybackPosition {
 	return d
 }
 
+// NewOptPlayerStartPostReq returns new OptPlayerStartPostReq with value set to v.
+func NewOptPlayerStartPostReq(v PlayerStartPostReq) OptPlayerStartPostReq {
+	return OptPlayerStartPostReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPlayerStartPostReq is optional PlayerStartPostReq.
+type OptPlayerStartPostReq struct {
+	Value PlayerStartPostReq
+	Set   bool
+}
+
+// IsSet returns true if OptPlayerStartPostReq was set.
+func (o OptPlayerStartPostReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPlayerStartPostReq) Reset() {
+	var v PlayerStartPostReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPlayerStartPostReq) SetTo(v PlayerStartPostReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPlayerStartPostReq) Get() (v PlayerStartPostReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPlayerStartPostReq) Or(d PlayerStartPostReq) PlayerStartPostReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -211,6 +257,85 @@ func (s *Pause) SetPausedMinusAt(val OptPlaybackPosition) {
 }
 
 type PlaybackPosition float32
+
+// PlayerStartPostAccepted is response for PlayerStartPost operation.
+type PlayerStartPostAccepted struct{}
+
+func (*PlayerStartPostAccepted) playerStartPostRes() {}
+
+// PlayerStartPostBadRequest is response for PlayerStartPost operation.
+type PlayerStartPostBadRequest struct{}
+
+func (*PlayerStartPostBadRequest) playerStartPostRes() {}
+
+// PlayerStartPostNotFound is response for PlayerStartPost operation.
+type PlayerStartPostNotFound struct{}
+
+func (*PlayerStartPostNotFound) playerStartPostRes() {}
+
+// PlayerStartPostReq represents sum type.
+type PlayerStartPostReq struct {
+	Type        PlayerStartPostReqType // switch on this field
+	VideoFile   VideoFile
+	VideoStream VideoStream
+}
+
+// PlayerStartPostReqType is oneOf type of PlayerStartPostReq.
+type PlayerStartPostReqType string
+
+// Possible values for PlayerStartPostReqType.
+const (
+	VideoFilePlayerStartPostReq   PlayerStartPostReqType = "VideoFile"
+	VideoStreamPlayerStartPostReq PlayerStartPostReqType = "VideoStream"
+)
+
+// IsVideoFile reports whether PlayerStartPostReq is VideoFile.
+func (s PlayerStartPostReq) IsVideoFile() bool { return s.Type == VideoFilePlayerStartPostReq }
+
+// IsVideoStream reports whether PlayerStartPostReq is VideoStream.
+func (s PlayerStartPostReq) IsVideoStream() bool { return s.Type == VideoStreamPlayerStartPostReq }
+
+// SetVideoFile sets PlayerStartPostReq to VideoFile.
+func (s *PlayerStartPostReq) SetVideoFile(v VideoFile) {
+	s.Type = VideoFilePlayerStartPostReq
+	s.VideoFile = v
+}
+
+// GetVideoFile returns VideoFile and true boolean if PlayerStartPostReq is VideoFile.
+func (s PlayerStartPostReq) GetVideoFile() (v VideoFile, ok bool) {
+	if !s.IsVideoFile() {
+		return v, false
+	}
+	return s.VideoFile, true
+}
+
+// NewVideoFilePlayerStartPostReq returns new PlayerStartPostReq from VideoFile.
+func NewVideoFilePlayerStartPostReq(v VideoFile) PlayerStartPostReq {
+	var s PlayerStartPostReq
+	s.SetVideoFile(v)
+	return s
+}
+
+// SetVideoStream sets PlayerStartPostReq to VideoStream.
+func (s *PlayerStartPostReq) SetVideoStream(v VideoStream) {
+	s.Type = VideoStreamPlayerStartPostReq
+	s.VideoStream = v
+}
+
+// GetVideoStream returns VideoStream and true boolean if PlayerStartPostReq is VideoStream.
+func (s PlayerStartPostReq) GetVideoStream() (v VideoStream, ok bool) {
+	if !s.IsVideoStream() {
+		return v, false
+	}
+	return s.VideoStream, true
+}
+
+// NewVideoStreamPlayerStartPostReq returns new PlayerStartPostReq from VideoStream.
+func NewVideoStreamPlayerStartPostReq(v VideoStream) PlayerStartPostReq {
+	var s PlayerStartPostReq
+	s.SetVideoStream(v)
+	return s
+}
 
 // PutPlayerPauseAccepted is response for PutPlayerPause operation.
 type PutPlayerPauseAccepted struct{}
@@ -351,3 +476,33 @@ func (s *Version) SetPatch(val int) {
 func (s *Version) SetSuffix(val OptString) {
 	s.Suffix = val
 }
+
+// Ref: #/components/schemas/VideoFile
+type VideoFile struct {
+	// The root the file is under.
+	Root int `json:"root"`
+	// The relative path to the file.
+	RelativePath string `json:"relativePath"`
+}
+
+// GetRoot returns the value of Root.
+func (s *VideoFile) GetRoot() int {
+	return s.Root
+}
+
+// GetRelativePath returns the value of RelativePath.
+func (s *VideoFile) GetRelativePath() string {
+	return s.RelativePath
+}
+
+// SetRoot sets the value of Root.
+func (s *VideoFile) SetRoot(val int) {
+	s.Root = val
+}
+
+// SetRelativePath sets the value of RelativePath.
+func (s *VideoFile) SetRelativePath(val string) {
+	s.RelativePath = val
+}
+
+type VideoStream string

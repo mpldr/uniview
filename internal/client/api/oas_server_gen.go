@@ -39,6 +39,12 @@ type Handler interface {
 	//
 	// GET /status
 	GetStatus(ctx context.Context) (GetStatusRes, error)
+	// PlayerStartPost implements POST /player/start operation.
+	//
+	// Start playback of a video.
+	//
+	// POST /player/start
+	PlayerStartPost(ctx context.Context, req OptPlayerStartPostReq) (PlayerStartPostRes, error)
 	// PutPlayerPause implements put-player-pause operation.
 	//
 	// Set the player into the given pause state.

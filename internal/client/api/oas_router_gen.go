@@ -99,8 +99,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 				}
-			case 'p': // Prefix: "player/p"
-				if l := len("player/p"); len(elem) >= l && elem[0:l] == "player/p" {
+			case 'p': // Prefix: "player/"
+				if l := len("player/"); len(elem) >= l && elem[0:l] == "player/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -110,28 +110,60 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'a': // Prefix: "ause"
-					if l := len("ause"); len(elem) >= l && elem[0:l] == "ause" {
+				case 'p': // Prefix: "p"
+					if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetPlayerPauseRequest([0]string{}, elemIsEscaped, w, r)
-						case "PUT":
-							s.handlePutPlayerPauseRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET,PUT")
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "ause"
+						if l := len("ause"); len(elem) >= l && elem[0:l] == "ause" {
+							elem = elem[l:]
+						} else {
+							break
 						}
 
-						return
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetPlayerPauseRequest([0]string{}, elemIsEscaped, w, r)
+							case "PUT":
+								s.handlePutPlayerPauseRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET,PUT")
+							}
+
+							return
+						}
+					case 'o': // Prefix: "osition"
+						if l := len("osition"); len(elem) >= l && elem[0:l] == "osition" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetPlayerPositionRequest([0]string{}, elemIsEscaped, w, r)
+							case "PUT":
+								s.handlePutPlayerPositionRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET,PUT")
+							}
+
+							return
+						}
 					}
-				case 'o': // Prefix: "osition"
-					if l := len("osition"); len(elem) >= l && elem[0:l] == "osition" {
+				case 's': // Prefix: "start"
+					if l := len("start"); len(elem) >= l && elem[0:l] == "start" {
 						elem = elem[l:]
 					} else {
 						break
@@ -140,12 +172,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if len(elem) == 0 {
 						// Leaf node.
 						switch r.Method {
-						case "GET":
-							s.handleGetPlayerPositionRequest([0]string{}, elemIsEscaped, w, r)
-						case "PUT":
-							s.handlePutPlayerPositionRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handlePlayerStartPostRequest([0]string{}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET,PUT")
+							s.notAllowed(w, r, "POST")
 						}
 
 						return
@@ -298,8 +328,8 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 					}
 				}
-			case 'p': // Prefix: "player/p"
-				if l := len("player/p"); len(elem) >= l && elem[0:l] == "player/p" {
+			case 'p': // Prefix: "player/"
+				if l := len("player/"); len(elem) >= l && elem[0:l] == "player/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -309,37 +339,78 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'a': // Prefix: "ause"
-					if l := len("ause"); len(elem) >= l && elem[0:l] == "ause" {
+				case 'p': // Prefix: "p"
+					if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch method {
-						case "GET":
-							// Leaf: GetPlayerPause
-							r.name = "GetPlayerPause"
-							r.operationID = "get-player-pause"
-							r.pathPattern = "/player/pause"
-							r.args = args
-							r.count = 0
-							return r, true
-						case "PUT":
-							// Leaf: PutPlayerPause
-							r.name = "PutPlayerPause"
-							r.operationID = "put-player-pause"
-							r.pathPattern = "/player/pause"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
+						break
+					}
+					switch elem[0] {
+					case 'a': // Prefix: "ause"
+						if l := len("ause"); len(elem) >= l && elem[0:l] == "ause" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetPlayerPause
+								r.name = "GetPlayerPause"
+								r.operationID = "get-player-pause"
+								r.pathPattern = "/player/pause"
+								r.args = args
+								r.count = 0
+								return r, true
+							case "PUT":
+								// Leaf: PutPlayerPause
+								r.name = "PutPlayerPause"
+								r.operationID = "put-player-pause"
+								r.pathPattern = "/player/pause"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+					case 'o': // Prefix: "osition"
+						if l := len("osition"); len(elem) >= l && elem[0:l] == "osition" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								// Leaf: GetPlayerPosition
+								r.name = "GetPlayerPosition"
+								r.operationID = "get-player-position"
+								r.pathPattern = "/player/position"
+								r.args = args
+								r.count = 0
+								return r, true
+							case "PUT":
+								// Leaf: PutPlayerPosition
+								r.name = "PutPlayerPosition"
+								r.operationID = "put-player-position"
+								r.pathPattern = "/player/position"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
 						}
 					}
-				case 'o': // Prefix: "osition"
-					if l := len("osition"); len(elem) >= l && elem[0:l] == "osition" {
+				case 's': // Prefix: "start"
+					if l := len("start"); len(elem) >= l && elem[0:l] == "start" {
 						elem = elem[l:]
 					} else {
 						break
@@ -347,19 +418,11 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 					if len(elem) == 0 {
 						switch method {
-						case "GET":
-							// Leaf: GetPlayerPosition
-							r.name = "GetPlayerPosition"
-							r.operationID = "get-player-position"
-							r.pathPattern = "/player/position"
-							r.args = args
-							r.count = 0
-							return r, true
-						case "PUT":
-							// Leaf: PutPlayerPosition
-							r.name = "PutPlayerPosition"
-							r.operationID = "put-player-position"
-							r.pathPattern = "/player/position"
+						case "POST":
+							// Leaf: PlayerStartPost
+							r.name = "PlayerStartPost"
+							r.operationID = ""
+							r.pathPattern = "/player/start"
 							r.args = args
 							r.count = 0
 							return r, true

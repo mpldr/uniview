@@ -49,6 +49,41 @@ type restServer struct {
 	status *api.StatusConnection
 }
 
+// PlayerStartPost implements POST /player/start operation.
+// Start playback of a video.
+//
+// POST /player/start
+func (r *restServer) PlayerStartPost(ctx context.Context, req api.OptPlayerStartPostReq) (api.PlayerStartPostRes, error) {
+	openPath := ""
+	switch req.Value.Type {
+	case api.VideoFilePlayerStartPostReq:
+		file, ok := req.Value.GetVideoFile()
+		if !ok {
+			return &api.PlayerStartPostBadRequest{}, nil
+		}
+
+		if file.Root >= len(config.Client.Media.Directories) {
+			return &api.PlayerStartPostNotFound{}, nil
+		}
+
+		root := config.Client.Media.Directories[file.Root]
+		openPath = path.Clean(path.Join(root, file.RelativePath))
+		if !strings.HasPrefix(openPath, root) {
+			return &api.PlayerStartPostNotFound{}, nil
+		}
+
+		fs, err := os.Stat(openPath)
+		if err != nil || fs.IsDir() {
+			return &api.PlayerStartPostNotFound{}, nil
+		}
+	case api.VideoStreamPlayerStartPostReq:
+		openPath = string(req.Value.VideoStream)
+	default:
+		return &api.PlayerStartPostBadRequest{}, nil
+	}
+	return &api.PlayerStartPostAccepted{}, r.p.LoadFile(openPath)
+}
+
 // FilesGet implements GET /files operation.
 // List file roots.
 //

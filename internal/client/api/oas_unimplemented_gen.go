@@ -59,6 +59,15 @@ func (UnimplementedHandler) GetStatus(ctx context.Context) (r GetStatusRes, _ er
 	return r, ht.ErrNotImplemented
 }
 
+// PlayerStartPost implements POST /player/start operation.
+//
+// Start playback of a video.
+//
+// POST /player/start
+func (UnimplementedHandler) PlayerStartPost(ctx context.Context, req OptPlayerStartPostReq) (r PlayerStartPostRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // PutPlayerPause implements put-player-pause operation.
 //
 // Set the player into the given pause state.
