@@ -5,16 +5,26 @@ package client
 
 import (
 	_ "embed"
+	"fmt"
 	"net/http"
+	"net/url"
 )
 
 type apiDocWrapper struct {
-	next http.Handler
+	next       http.Handler
+	remoteHost string
+	secure     string
 }
 
-func NewDocWrapper(next http.Handler) *apiDocWrapper {
+func NewDocWrapper(next http.Handler, connectTo *url.URL) *apiDocWrapper {
+	secure := "s"
+	if connectTo.Query().Has("insecure") {
+		secure = ""
+	}
 	return &apiDocWrapper{
-		next: next,
+		next:       next,
+		remoteHost: connectTo.Host,
+		secure:     secure,
 	}
 }
 
@@ -24,6 +34,8 @@ func (a *apiDocWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write(docPage)
 		return
 	}
+	w.Header().Add("Access-Control-Allow-Origin", fmt.Sprintf("http%s://%s", a.secure, a.remoteHost))
+	w.Header().Add("Access-Control-Allow-Methods", "*")
 	a.next.ServeHTTP(w, r)
 }
 

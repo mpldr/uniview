@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"regexp"
@@ -24,7 +25,7 @@ import (
 	"github.com/ogen-go/ogen/ogenerrors"
 )
 
-func StartRestServer(_ context.Context, p player.Interface, status *api.StatusConnection) error {
+func StartRestServer(_ context.Context, p player.Interface, status *api.StatusConnection, remote *url.URL) error {
 	r := &restServer{p, status}
 
 	srv, err := api.NewServer(r, api.WithErrorHandler(ogenerrors.DefaultErrorHandler))
@@ -32,7 +33,7 @@ func StartRestServer(_ context.Context, p player.Interface, status *api.StatusCo
 		return fmt.Errorf("failed to create client API: %w", err)
 	}
 
-	wrapper := NewDocWrapper(srv)
+	wrapper := NewDocWrapper(srv, remote)
 
 	httpSrv := &http.Server{
 		Addr:    "[::1]:21558",

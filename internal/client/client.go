@@ -46,7 +46,7 @@ func StartClient(u *url.URL) error {
 	defer p.Close()
 
 	status := api.StatusConnectionConnecting
-	go StartRestServer(context.Background(), p, &status)
+	go StartRestServer(context.Background(), p, &status, u)
 
 	glog.Debugf("loading file %q…", u.Query().Get("file"))
 	err = p.LoadFile(u.Query().Get("file"))
