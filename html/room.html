@@ -11,6 +11,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Room - Video Sync</title>
 		<link href="/bootstrap.min.css" rel="stylesheet">
+		<link rel="icon" href="/logo.svg" type="image/svg+xml">
 		<style>
 .full-height {
 	height: 100vh;
@@ -26,12 +27,9 @@
 	</head>
 
 	<body>
-
 		<div class="d-flex justify-content-center align-items-center full-height">
 			<div>
 				<div class="mb-3">
-					<label for="filePicker" class="form-label">Add to Playlist</label>
-					<input type="file" class="form-control" id="filePicker" style="display: none;">
 					<button class="btn btn-primary" onclick="openFileDialog()">Select Video</button>
 				</div>
 				<ul class="list-group" id="playlist"></ul>
@@ -48,15 +46,6 @@
 						<div class="modal-body">
 							<table class="table hide" id="filelist">
 								<tbody>
-									<tr>
-										<td>test/</td>
-									</tr>
-									<tr>
-										<td>test.mp4</td>
-									</tr>
-									<tr>
-										<td>another-test.mp4</td>
-									</tr>
 								</tbody>
 							</table>
 							<div class="d-flex justify-content-start hide" id="listloader">

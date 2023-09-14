@@ -122,7 +122,22 @@ function listDirectory(root, relpath) {
 }
 
 function playFile(root, path) {
-	alert("not implemented!");
+	fetch('http://localhost:21558/player/start',
+		{
+			method: "POST",
+			body: JSON.stringify({
+				root: root,
+				relativePath: path
+			}),
+			headers: {
+				"Content-type": "application/json; charset=UTF-8"
+			}
+		}	).then(r => {
+			console.log(r);
+		})
+		.catch((error)=>{
+			console.log(error);
+		})
 }
 
 window.onload = function() {
