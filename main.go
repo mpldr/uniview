@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -16,32 +17,48 @@ import (
 	cli "github.com/jawher/mow.cli"
 )
 
+var levels = map[string]slog.Level{
+	"debug": slog.LevelDebug,
+	"info":  slog.LevelInfo,
+	"warn":  slog.LevelWarn,
+	"error": slog.LevelError,
+}
+
 func main() {
 	defer glog.PanicHandler()
-	glog.SetLevel(glog.INFO)
+
+	loglevel, ok := os.LookupEnv("LOG_LEVEL")
+	if !ok {
+		loglevel = "info"
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: loglevel == "debug",
+		Level:     levels[loglevel],
+	})))
 
 	if filepath.Base(os.Args[0]) == "univiewd" {
-		glog.Debug("starting in server mode")
+		slog.Debug("starting in server mode")
 
 		err := config.Load(&config.Server, config.ServerPaths)
 		if err != nil {
-			glog.Warnf("no config loaded: %v", err)
+			slog.Warn("no config loaded", "error", err)
 		}
 
 		err = startServer()
 		if err != nil {
-			glog.Errorf("failed to start server: %v", err)
+			slog.Error("failed to start server", "error", err)
 			os.Exit(1)
 		}
-		glog.Debug("server has shut down")
+		slog.Debug("server has shut down")
 		return
 	}
 
 	app := cli.App("uniview", "synchronise video playback")
-	app.Spec = "([--insecure] SERVER ROOM FILE) | URL | --version"
+	app.Spec = "[--log-level] (([--insecure] SERVER ROOM FILE) | URL | --version)"
 
 	var server, room, file, rawurl string
 	var insecure, ver bool
+	app.StringOptPtr(&loglevel, "l log-level", loglevel, "sets the loglevel between debug, info, warn, and error")
 	app.StringArgPtr(&server, "SERVER", "", "the server to connect to")
 	app.StringArgPtr(&room, "ROOM", "", "the room to join")
 	app.StringArgPtr(&file, "FILE", "", "the file to open")
@@ -55,12 +72,17 @@ func main() {
 			return
 		}
 
+		slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			AddSource: loglevel == "debug",
+			Level:     levels[loglevel],
+		})))
+
 		err := config.Load(&config.Client, config.ClientPaths)
 		if err != nil {
-			glog.Warnf("no config loaded: %v", err)
+			slog.Warn("no config loaded", "error", err)
 		}
 
-		glog.Infof("starting uniview version %s", buildinfo.VersionString())
+		slog.Info("starting uniview", "version", buildinfo.VersionString())
 
 		var u *url.URL
 		if len(rawurl) == 0 {
@@ -76,14 +98,14 @@ func main() {
 			u, err = url.Parse(rawurl)
 		}
 		if err != nil {
-			glog.Errorf("failed to parse URL: %v", err)
+			slog.Error("failed to parse URL", "url", u, "error", err)
 			os.Exit(1)
 		}
 
-		glog.Debugf("connecting to %s", u)
+		slog.Debug("connecting", "url", u)
 		err = client.StartClient(u)
 		if err != nil {
-			glog.Errorf("failed to start server: %v", err)
+			slog.Error("failed to start server", "error", err)
 			os.Exit(1)
 		}
 	}

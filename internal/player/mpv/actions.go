@@ -6,11 +6,11 @@ package mpv
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"time"
 
 	"git.sr.ht/~mpldr/uniview/internal/player"
-	"git.sr.ht/~poldi1405/glog"
 )
 
 func (p *MPV) Pause(state bool) error {
@@ -18,14 +18,14 @@ func (p *MPV) Pause(state bool) error {
 		return player.ErrPlayerDead
 	}
 	req := rand.Int()
-	glog.Tracef("sending command to set pause to %t", state)
+	slog.Debug("sending pause command", "desired_state", state)
 	p.dropPause.Store(true)
 	p.send(command{
 		Command:   []any{"set_property", "pause", state},
 		RequestID: req,
 	})
 	res := p.getResponse(req)
-	glog.Tracef("received response %#v", res)
+	slog.Debug("received response", "response", res)
 	if res.Error != "" && res.Error != "success" {
 		return errors.New(res.Error)
 	}
@@ -37,13 +37,13 @@ func (p *MPV) LoadFile(path string) error {
 		return player.ErrPlayerDead
 	}
 	req := rand.Int()
-	glog.Tracef("sending command to load %q", path)
+	slog.Debug("sending command to load file", "file", path)
 	p.send(command{
 		Command:   []any{"loadfile", path},
 		RequestID: req,
 	})
 	res := p.getResponse(req)
-	glog.Tracef("received response %#v", res)
+	slog.Debug("received response", "response", res)
 	if res.Error != "" && res.Error != "success" {
 		return errors.New(res.Error)
 	}
@@ -55,14 +55,14 @@ func (p *MPV) Seek(ts time.Duration) error {
 		return player.ErrPlayerDead
 	}
 	req := rand.Int()
-	glog.Tracef("sending command to seek to %s", ts)
+	slog.Debug("sending command to seek", "seek_to", ts)
 	p.dropSeek.Store(true)
 	p.send(command{
 		Command:   []any{"set_property", "time-pos", float64(ts/time.Millisecond) / 1000},
 		RequestID: req,
 	})
 	res := p.getResponse(req)
-	glog.Tracef("received response %#v", res)
+	slog.Debug("received response", "response", res)
 	if res.Error != "" && res.Error != "success" {
 		return errors.New(res.Error)
 	}
@@ -78,13 +78,13 @@ func (p *MPV) GetPlaybackPos() (time.Duration, error) {
 		return 0, player.ErrPlayerDead
 	}
 	req := rand.Int()
-	glog.Trace("sending command to query playback position")
+	slog.Debug("sending command to query playback position")
 	p.send(command{
 		Command:   []any{"get_property", "time-pos"},
 		RequestID: req,
 	})
 	res := p.getResponse(req)
-	glog.Tracef("received response %#v", res)
+	slog.Debug("received response", "response", res)
 	if pos, ok := res.Data.(float64); ok {
 		ts := time.Duration(pos*1000) * time.Millisecond
 		return ts, nil

@@ -5,11 +5,10 @@ package client
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"sync"
 	"time"
-
-	"git.sr.ht/~poldi1405/glog"
 )
 
 var shutdownFuncs []func(context.Context) error
@@ -20,7 +19,7 @@ func serverShutdown(ctx context.Context, cancel context.CancelFunc, signals <-ch
 	select {
 	case sig := <-signals:
 		cancel()
-		glog.Infof("received %s, shutting down", sig)
+		slog.Info("received signal. shutting down…", "signal", sig)
 	case <-ctx.Done():
 	}
 
@@ -33,14 +32,14 @@ func serverShutdown(ctx context.Context, cancel context.CancelFunc, signals <-ch
 		go func(ctx context.Context, id int, f func(context.Context) error) {
 			defer wg.Done()
 
-			glog.Debugf("shutting down %d", id)
+			slog.Debug("shutting down", "id", id)
 			awaitStop := make(chan struct{})
 			go func() {
 				defer close(awaitStop)
 
 				err := f(ctx)
 				if err != nil {
-					glog.Warnf("failed to cleanly shutdown: %v", err)
+					slog.Warn("failed to shutdown gracefully", "error", err)
 				}
 			}()
 			select {
@@ -48,10 +47,10 @@ func serverShutdown(ctx context.Context, cancel context.CancelFunc, signals <-ch
 			case <-ctx.Done():
 				return
 			}
-			glog.Debugf("completed shutdown of %d", id)
+			slog.Debug("completed shutdown", "id", id)
 		}(waitCtx, i, f)
 	}
 
 	wg.Wait()
-	glog.Debug("unlocking quit")
+	slog.Debug("unlocking quit")
 }

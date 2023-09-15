@@ -6,8 +6,7 @@ package mpv
 import (
 	"encoding/json"
 	"fmt"
-
-	"git.sr.ht/~poldi1405/glog"
+	"log/slog"
 )
 
 func (p *MPV) send(cmd command) {
@@ -16,7 +15,7 @@ func (p *MPV) send(cmd command) {
 	}
 	cmdJSON, _ := json.Marshal(cmd)
 	_, err := fmt.Fprintf(p.conn, "%s\n", cmdJSON)
-	glog.Tracef("sent: %s: %v", cmdJSON, err)
+	slog.Debug("sent command", "command", cmdJSON, "error", err)
 }
 
 func (p *MPV) getResponse(id int) response {

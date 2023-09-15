@@ -5,23 +5,25 @@ package server
 
 import (
 	"io"
+	"log/slog"
 
+	"git.sr.ht/~mpldr/uniview/internal/conman"
 	"git.sr.ht/~mpldr/uniview/protocol"
-	"git.sr.ht/~poldi1405/glog"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 func (s *Server) Room(feed protocol.UniView_RoomServer) error {
-	glog.Trace("new connection initialized. waiting for join event…")
+	log := conman.GetLogger(feed.Context())
+	log.Debug("new connection initialized. waiting for join event…")
 	ev, err := feed.Recv()
 	if err != nil {
-		glog.Warnf("failed to receive initial message: %v", err)
+		log.Warn("failed to receive initial message", "error", err)
 		return status.Errorf(codes.Internal, "failed to receive join event: %v", err)
 	}
 	if ev.Type != protocol.EventType_EVENT_JOIN {
-		glog.Warnf("received unexpected join event: %s", ev.Type)
+		log.Warn("received unexpected join event", "type", ev.Type)
 		return status.Errorf(codes.FailedPrecondition, "received unexpected join event: %s", ev.Type)
 	}
 
@@ -35,17 +37,21 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 	}
 
 	room, id := s.Rooms.GetRoom(joinEv.Name)
-	glog.Debugf("client has been assigned id %d", id)
+	log = slog.With("grpc_client_id", id)
+	log.Debug("client connected")
 	room.Client(feed, id)
 	defer room.Disconnect(id)
 	if room.GetPosition() < 0 {
+		log.Debug("unitialized room")
 		if joinEv.Timestamp.AsDuration() < 0 {
+			log.Debug("no timestamp provided")
 			joinEv.Timestamp = durationpb.New(0)
 		}
+		log.Debug("initialized room", "timestamp", joinEv.Timestamp.AsDuration())
 		room.SetPosition(joinEv.Timestamp.AsDuration())
 		room.SetPause(false)
 	} else {
-		feed.Send(&protocol.RoomEvent{
+		ev := &protocol.RoomEvent{
 			Type: protocol.EventType_EVENT_PAUSE,
 			Event: &protocol.RoomEvent_PauseEvent{
 				PauseEvent: &protocol.PlayPause{
@@ -53,21 +59,23 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 					Timestamp: durationpb.New(room.GetPosition()),
 				},
 			},
-		})
+		}
+		log.Debug("sending initial state to client", "state", ev)
+		feed.Send(ev)
 	}
 
 	for {
 		ev, err = feed.Recv()
 		switch {
 		case err == io.EOF:
-			glog.Debugf("closed connection")
+			log.Debug("closed connection")
 			return nil
 		case err != nil:
 			select {
 			case <-feed.Context().Done():
 				return nil
 			default:
-				glog.Errorf("feed: failed to read value: %v", err)
+				log.Error("failed to read value", "error", err)
 				return status.Errorf(codes.Internal, "failed to receive event: %v", err)
 			}
 		}
@@ -81,10 +89,10 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 		case protocol.EventType_EVENT_JUMP:
 			room.SetPosition(ev.GetJumpEvent().GetTimestamp().AsDuration())
 		case protocol.EventType_EVENT_CLIENT_DISCONNECT:
-			glog.Debugf("client %d disconnected", id)
+			log.Debug("client disconnected")
 			return nil
 		}
-		glog.Debugf("received %s from %d", ev.Type, id)
+		log.Debug("received event", "type", ev.Type)
 		room.Broadcast(ev, id)
 	}
 }

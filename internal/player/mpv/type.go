@@ -5,6 +5,7 @@ package mpv
 
 import (
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"os/exec"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"git.sr.ht/~mpldr/uniview/internal/player"
-	"git.sr.ht/~poldi1405/glog"
 	"github.com/adrg/xdg"
 	"github.com/fsnotify/fsnotify"
 )
@@ -96,7 +96,7 @@ outer:
 	for {
 		select {
 		case ev := <-watcher.Events:
-			glog.Debugf("received: %#v", ev)
+			slog.Debug("filewatcher received event", "event", ev)
 			if ev.Has(fsnotify.Create) {
 				watcher.Close()
 				break outer
@@ -116,7 +116,7 @@ outer:
 	go p.monitor()
 
 	<-p.notifyIdle
-	glog.Trace("confirmed player idle state")
+	slog.Debug("confirmed player idle state")
 
 	go p.pollPause()
 	go p.handleSeekEvents()

@@ -6,6 +6,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -21,7 +22,6 @@ import (
 	"git.sr.ht/~mpldr/uniview/internal/client/api"
 	"git.sr.ht/~mpldr/uniview/internal/config"
 	"git.sr.ht/~mpldr/uniview/internal/player"
-	"git.sr.ht/~poldi1405/glog"
 	"github.com/ogen-go/ogen/ogenerrors"
 )
 
@@ -232,7 +232,7 @@ func (r *restServer) GetStatus(_ context.Context) (api.GetStatusRes, error) {
 //
 // PUT /player/pause
 func (r *restServer) PutPlayerPause(_ context.Context, req bool) error {
-	glog.Debugf("api: setting pause state to %t", req)
+	slog.Debug("setting pause state", "state", req)
 	return r.p.Pause(req)
 }
 
@@ -242,6 +242,6 @@ func (r *restServer) PutPlayerPause(_ context.Context, req bool) error {
 //
 // PUT /player/position
 func (r *restServer) PutPlayerPosition(_ context.Context, req api.PlaybackPosition) error {
-	glog.Debugf("api: seek to %s", time.Duration(req)*time.Millisecond)
+	slog.Debug("seek", "seek_to", time.Duration(req)*time.Millisecond)
 	return r.p.Seek(time.Duration(req * api.PlaybackPosition(time.Second)))
 }

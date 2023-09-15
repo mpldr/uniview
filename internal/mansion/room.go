@@ -5,11 +5,11 @@ package mansion
 
 import (
 	"context"
+	"log/slog"
 	"sync"
 	"time"
 
 	"git.sr.ht/~mpldr/uniview/protocol"
-	"git.sr.ht/~poldi1405/glog"
 )
 
 type room struct {
@@ -42,12 +42,12 @@ func (r *room) Broadcast(ev *protocol.RoomEvent, id uint64) {
 	r.clientFeedMtx.Lock()
 	defer r.clientFeedMtx.Unlock()
 
-	glog.Debugf("broadcasting message to %d clients", len(r.clientFeed))
+	slog.Debug("broadcasting message to clients", "count", len(r.clientFeed))
 
 	max := len(r.clientFeed)
 	for i := 0; i < max; i++ {
 		for r.clientFeed[i].Dead() && ev.Type != protocol.EventType_EVENT_SERVER_CLOSE {
-			glog.Trace("removing client")
+			slog.Debug("removing client", "client_id", r.clientFeed[i].id)
 			r.clientFeed[i] = r.clientFeed[len(r.clientFeed)-1]
 			r.clientFeed[len(r.clientFeed)-1] = nil
 			r.clientFeed = r.clientFeed[:len(r.clientFeed)-1]
@@ -57,13 +57,13 @@ func (r *room) Broadcast(ev *protocol.RoomEvent, id uint64) {
 			}
 		}
 		if r.clientFeed[i].id == id {
-			glog.Debugf("skipping client %d as the originator", id)
+			slog.Debug("skipping client sender", "client_id", id)
 			continue
 		}
-		glog.Tracef("sending %s to client %d", ev.Type, r.clientFeed[i].id)
+		slog.Debug("sending event to client", "event_type", ev.Type, "client_id", r.clientFeed[i].id)
 		err := r.clientFeed[i].Send(ev)
 		if err != nil {
-			glog.Warnf("failed to send to client %d: %v", i, err)
+			slog.Warn("failed to send to client", "client_id", r.clientFeed[i].id, "error", err)
 		}
 	}
 }

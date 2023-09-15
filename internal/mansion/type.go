@@ -5,12 +5,12 @@ package mansion
 
 import (
 	"context"
+	"log/slog"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"git.sr.ht/~mpldr/uniview/protocol"
-	"git.sr.ht/~poldi1405/glog"
 )
 
 type Mansion struct {
@@ -39,13 +39,13 @@ func (m *Mansion) housekeeping() {
 		select {
 		case <-m.ctx.Done():
 			m.roomsMtx.Lock()
-			glog.Debugf("evacuating %d rooms", len(m.rooms))
+			slog.Debug("evacuating rooms", "count", len(m.rooms))
 			var wg sync.WaitGroup
 			for n, r := range m.rooms {
 				wg.Add(1)
 				go func(r *room, name string) {
 					defer wg.Done()
-					defer glog.Debugf("cleared room %s", name)
+					defer slog.Debug("cleared room", "id", name)
 
 					r.Broadcast(&protocol.RoomEvent{
 						Type: protocol.EventType_EVENT_SERVER_CLOSE,
@@ -56,14 +56,14 @@ func (m *Mansion) housekeeping() {
 			close(m.shutDown)
 			return
 		case <-time.After(5 * time.Minute):
-			glog.Debug("running housekeeper")
+			slog.Debug("running housekeeper")
 			m.roomsMtx.RLock()
 			var wg sync.WaitGroup
 			for n, r := range m.rooms {
 				wg.Add(1)
 				go func(r *room, name string) {
 					defer wg.Done()
-					defer glog.Tracef("pinging room %s", name)
+					defer slog.Debug("pinging room", "id", name)
 
 					r.Broadcast(&protocol.RoomEvent{
 						Type: protocol.EventType_EVENT_SERVER_PING,
@@ -71,24 +71,24 @@ func (m *Mansion) housekeeping() {
 				}(r, n)
 			}
 			wg.Wait()
-			glog.Debug("finished pinging")
+			slog.Debug("finished pinging")
 			m.roomsMtx.RUnlock()
 
 			m.roomsMtx.Lock()
 			for n, r := range m.rooms {
 				if len(r.clientFeed) == 0 {
-					glog.Debugf("deleted room %s", n)
+					slog.Debug("deleted room", "id", n)
 					delete(m.rooms, n)
 				}
 			}
-			glog.Debug("housekeeper finished")
+			slog.Debug("housekeeper finished")
 			m.roomsMtx.Unlock()
 		}
 	}
 }
 
 func (m *Mansion) GetRoom(name string) (*room, uint64) {
-	glog.Tracef("requested room: %s", name)
+	slog.Debug("requested room", "id", name)
 	m.roomsMtx.RLock()
 	if r, exists := m.rooms[name]; exists {
 		m.roomsMtx.RUnlock()
@@ -96,7 +96,7 @@ func (m *Mansion) GetRoom(name string) (*room, uint64) {
 		return r, id
 	}
 
-	glog.Tracef("creating new room %q", name)
+	slog.Debug("creating new room", "id", name)
 	m.roomsMtx.RUnlock()
 	m.roomsMtx.Lock()
 	r := newRoom(m.ctx)
@@ -108,7 +108,7 @@ func (m *Mansion) GetRoom(name string) (*room, uint64) {
 }
 
 func (m *Mansion) Close() {
-	glog.Debug("closing mansion and evicting tenants")
+	slog.Debug("closing mansion and evicting tenants")
 	m.cancel()
 	select {
 	case <-m.shutDown:

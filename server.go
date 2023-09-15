@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -19,7 +20,8 @@ import (
 	"git.sr.ht/~mpldr/uniview/internal/server"
 	wraphttp "git.sr.ht/~mpldr/uniview/internal/server/http"
 	"git.sr.ht/~mpldr/uniview/protocol"
-	"git.sr.ht/~poldi1405/glog"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 )
 
@@ -27,7 +29,7 @@ var shutdown []func()
 
 func serverShutdown(signals <-chan os.Signal) {
 	sig := <-signals
-	glog.Infof("received %s, shutting down", sig)
+	slog.Info("signal received. shutting down", "signal", sig)
 	var wg sync.WaitGroup
 
 	for _, f := range shutdown {
@@ -53,13 +55,14 @@ func startServer() error {
 	})
 	shutdown = append(shutdown, grpcShutdown(grpcsrv))
 
-	glog.Debugf("starting listener on %s", config.Server.General.Bind)
+	slog.Debug("starting listener", "bind_to", config.Server.General.Bind)
 	lis, err := net.Listen("tcp", config.Server.General.Bind)
 	if err != nil {
 		return fmt.Errorf("failed to start listener: %w", err)
 	}
 
-	handler, err := wraphttp.NewServer(grpcsrv)
+	var handler http.Handler
+	handler, err = wraphttp.NewServer(grpcsrv)
 	if err != nil {
 		return fmt.Errorf("failed to wrap gRPC: %w", err)
 	}
@@ -67,10 +70,12 @@ func startServer() error {
 	go serverShutdown(sigs)
 	signal.Notify(sigs, os.Interrupt)
 
+	handler = h2c.NewHandler(handler, &http2.Server{})
 	srv := &http.Server{
 		Addr:    config.Server.General.Bind,
 		Handler: handler,
 	}
+
 	shutdown = append(shutdown, httpShutdown(srv.Shutdown))
 
 	err = srv.Serve(lis)
@@ -98,6 +103,7 @@ func grpcShutdown(srv *grpc.Server) func() {
 		select {
 		case <-awaitStop:
 		case <-time.After(5 * time.Second):
+			slog.Debug("force-stopping gRPC")
 			srv.Stop()
 		}
 	}

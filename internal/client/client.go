@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"os"
@@ -19,7 +20,6 @@ import (
 	"git.sr.ht/~mpldr/uniview/internal/player"
 	"git.sr.ht/~mpldr/uniview/internal/player/mpv"
 	"git.sr.ht/~mpldr/uniview/protocol"
-	"git.sr.ht/~poldi1405/glog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -38,7 +38,7 @@ func StartClient(u *url.URL) error {
 	go serverShutdown(ctx, cancel, sigs, waitForExit)
 	signal.Notify(sigs, os.Interrupt)
 
-	glog.Debug("starting player…")
+	slog.Debug("starting player…")
 	p, err = mpv.New()
 	if err != nil {
 		return fmt.Errorf("failed to start mpv: %w", err)
@@ -48,7 +48,7 @@ func StartClient(u *url.URL) error {
 	status := api.StatusConnectionConnecting
 	go StartRestServer(context.Background(), p, &status, u)
 
-	glog.Debugf("loading file %q…", u.Query().Get("file"))
+	slog.Debug("loading file", "file", u.Query().Get("file"))
 	err = p.LoadFile(u.Query().Get("file"))
 	if err != nil {
 		return fmt.Errorf("failed to load file: %w", err)
@@ -66,7 +66,7 @@ func StartClient(u *url.URL) error {
 		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	}
 
-	glog.Debugf("connecting to remote…")
+	slog.Debug("connecting to remote", "host", u.Host, "insecure_explicit", u.Query().Has("insecure"), "insecure_ip", insecureByDefault(u.Hostname()))
 	dialCtx, dialCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	gconn, err := grpc.DialContext(dialCtx, u.Host, opts...)
 	dialCancel()
@@ -77,7 +77,7 @@ func StartClient(u *url.URL) error {
 
 	status = api.StatusConnectionOk
 
-	glog.Debug("requesting handle…")
+	slog.Debug("requesting handle")
 	cl := protocol.NewUniViewClient(gconn)
 	stream, err := cl.Room(context.Background())
 	if err != nil {
@@ -94,7 +94,7 @@ func StartClient(u *url.URL) error {
 		return errors.New("no room provided")
 	}
 
-	glog.Debugf("Joining room %q", room)
+	slog.Debug("joining room", "room", room)
 	err = stream.Send(&protocol.RoomEvent{
 		Type: protocol.EventType_EVENT_JOIN,
 		Event: &protocol.RoomEvent_Join{
@@ -109,7 +109,7 @@ func StartClient(u *url.URL) error {
 		return fmt.Errorf("failed to join room: %w", err)
 	}
 
-	glog.Debug("waiting for remote events…")
+	slog.Debug("waiting for remote events")
 	go func() {
 		receiveEvents(ctx, p, stream)
 		select {
@@ -127,21 +127,21 @@ func StartClient(u *url.URL) error {
 		}
 	}()
 
-	glog.Debug("waiting for shutdown")
+	slog.Debug("waiting for shutdown")
 	<-waitForExit
-	glog.Debug("completed shutdown")
+	slog.Debug("completed shutdown")
 
 	return nil
 }
 
 func sendPlayerEvents(ctx context.Context, p player.Interface, cl protocol.UniView_RoomClient) {
-	glog.Debug("waiting for player events…")
+	slog.Debug("waiting for player events")
 
 loop:
 	for {
 		select {
 		case timestamp := <-p.NotifySeek():
-			glog.Debugf("local: seek to %s detected", timestamp)
+			slog.Debug("seek detected", "origin", "local", "seek_to", timestamp)
 			cl.Send(&protocol.RoomEvent{
 				Type: protocol.EventType_EVENT_JUMP,
 				Event: &protocol.RoomEvent_JumpEvent{
@@ -151,13 +151,13 @@ loop:
 				},
 			})
 		case pause := <-p.NotifyPause():
-			glog.Debugf("local: pause state change to %t detected", pause)
+			slog.Debug("pause state change detected", "origin", "local", "state", pause)
 			pos, err := p.GetPlaybackPos()
 			if err != nil {
-				glog.Warnf("failed to get playback position: %v", err)
+				slog.Warn("failed to get playback position", "error", err)
 				break
 			}
-			glog.Debugf("local: pause state triggered at %s", pos)
+			slog.Debug("sending pause state update", "state", pos, "timestamp", pos)
 			cl.Send(&protocol.RoomEvent{
 				Type: protocol.EventType_EVENT_PAUSE,
 				Event: &protocol.RoomEvent_PauseEvent{
@@ -186,7 +186,7 @@ func receiveEvents(ctx context.Context, p player.Interface, cl protocol.UniView_
 		for {
 			ev, err := cl.Recv()
 			if err != nil {
-				glog.Errorf("receive failed: %v", err)
+				slog.Error("receive failed", "error", err)
 				return
 			}
 			events <- ev
@@ -201,35 +201,35 @@ func receiveEvents(ctx context.Context, p player.Interface, cl protocol.UniView_
 			if !open {
 				return
 			}
-			glog.Debugf("received %s", ev.Type)
+			slog.Debug("received event", "type", ev.Type)
 
 			<-p.PlayerReady()
 			switch ev.Type {
 			case protocol.EventType_EVENT_PAUSE:
 				pauseEv := ev.GetPauseEvent()
 				if pauseEv == nil {
-					glog.Warn("received empty pause event")
+					slog.Warn("received empty pause event")
 					continue
 				}
 
-				glog.Debugf("remote: pause %t", pauseEv.Pause)
+				slog.Debug("pause state change detected", "origin", "remote", "state", pauseEv.Pause)
 				p.Pause(pauseEv.Pause)
-				glog.Debugf("remote: pause jump to %s", pauseEv.Timestamp.AsDuration())
+				slog.Debug("seek detected", "origin", "remote", "seek_to", pauseEv.Timestamp.AsDuration())
 				p.Seek(pauseEv.Timestamp.AsDuration())
 			case protocol.EventType_EVENT_JUMP:
 				jumpEv := ev.GetJumpEvent()
 				if jumpEv == nil {
-					glog.Warn("received empty jump event")
+					slog.Warn("received empty jump event")
 					continue
 				}
 
-				glog.Debugf("remote: jump to %s", jumpEv.Timestamp.AsDuration())
+				slog.Debug("seek detected", "origin", "remote", "seek_to", jumpEv.Timestamp.AsDuration())
 				p.Seek(jumpEv.Timestamp.AsDuration())
 			case protocol.EventType_EVENT_SERVER_CLOSE:
-				glog.Info("received shutdown notification from the server. Disconnecting.")
+				slog.Info("received shutdown notification from the server. Disconnecting.")
 			case protocol.EventType_EVENT_SERVER_PING: // ignore
 			default:
-				glog.Warnf("received unknown event: %s", ev.Type)
+				slog.Warn("received unknown event", "type", ev.Type)
 			}
 		}
 	}

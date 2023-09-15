@@ -7,10 +7,9 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"math/rand"
 	"time"
-
-	"git.sr.ht/~poldi1405/glog"
 )
 
 func (p *MPV) monitor() {
@@ -29,16 +28,16 @@ func (p *MPV) monitor() {
 		}
 		var res response
 		err = json.Unmarshal(message, &res)
-		glog.Tracef("received message: %s", message)
+		slog.Debug("received message", "message", message)
 		if err != nil {
-			glog.Warnf("received non-understood message %q", message)
+			slog.Warn("received non-understood message", "message", message)
 			continue
 		}
 
 		switch {
 		case res.Event == "seek":
 			if p.dropSeek.Load() {
-				glog.Trace("dropped seek")
+				slog.Debug("dropped seek")
 				p.dropSeek.Store(false)
 				continue
 			}
