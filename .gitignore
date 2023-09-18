@@ -9,3 +9,5 @@ windows/*
 *.pem
 *.ico
 *.syso
+*.log
+*.patch
