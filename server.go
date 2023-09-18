@@ -23,6 +23,7 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 var shutdown []func()
@@ -53,6 +54,7 @@ func startServer() error {
 	protocol.RegisterUniViewServer(grpcsrv, &server.Server{
 		Rooms: roomMan,
 	})
+	reflection.Register(grpcsrv)
 	shutdown = append(shutdown, grpcShutdown(grpcsrv))
 
 	slog.Debug("starting listener", "bind_to", config.Server.General.Bind)
