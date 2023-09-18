@@ -102,6 +102,7 @@ func StartClient(u *url.URL) error {
 				Name:      room,
 				Timestamp: durationpb.New(pos),
 				Url:       u.Query().Get("file"),
+				Password:  u.Fragment,
 			},
 		},
 	})
