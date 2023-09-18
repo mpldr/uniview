@@ -11,7 +11,9 @@ import (
 	"strings"
 	templates "webinterface"
 
+	"git.sr.ht/~mpldr/uniview/internal/config"
 	"git.sr.ht/~mpldr/uniview/internal/conman"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -33,9 +35,16 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
 		log.Debug("serving index")
+		s.lobbyPagesServed.Inc()
 		s.templates[TemplateIndex].Execute(w, nil)
 	case "/healthcheck":
 		w.WriteHeader(http.StatusNoContent)
+	case "/metrics":
+		if config.Server.Advanced.EnableInstrumentation {
+			promhttp.Handler().ServeHTTP(w, r)
+			return
+		}
+		fallthrough
 	default:
 		data, err := templates.Templates.ReadFile(path.Join("dist", r.URL.Path))
 		if err == nil {
@@ -46,6 +55,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Debug("serving room interface")
+		s.roomPagesServed.Inc()
 		s.templates[TemplateRoom].Execute(w, nil)
 	}
 }

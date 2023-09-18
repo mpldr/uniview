@@ -14,12 +14,20 @@ var Server = struct {
 		Bind string `toml:"bind-to"`
 		Host string `toml:"host"`
 	} `toml:"general"`
+	Advanced struct {
+		EnableInstrumentation bool `toml:"enable-instrumentation"`
+	} `toml:"advanced"`
 }{
 	General: struct {
 		Bind string `toml:"bind-to"`
 		Host string `toml:"host"`
 	}{
 		Bind: "127.1.2.4:1558",
+	},
+	Advanced: struct {
+		EnableInstrumentation bool `toml:"enable-instrumentation"`
+	}{
+		EnableInstrumentation: false,
 	},
 }
 

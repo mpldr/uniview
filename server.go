@@ -64,7 +64,7 @@ func startServer() error {
 	}
 
 	var handler http.Handler
-	handler, err = wraphttp.NewServer(grpcsrv)
+	handler, err = wraphttp.NewServer(grpcsrv, roomMan)
 	if err != nil {
 		return fmt.Errorf("failed to wrap gRPC: %w", err)
 	}
