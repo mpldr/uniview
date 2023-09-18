@@ -16,8 +16,6 @@ import (
 	"strings"
 	"time"
 
-	_ "embed"
-
 	"git.sr.ht/~mpldr/uniview/internal/buildinfo"
 	"git.sr.ht/~mpldr/uniview/internal/client/api"
 	"git.sr.ht/~mpldr/uniview/internal/config"

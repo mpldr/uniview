@@ -45,6 +45,19 @@ func StartClient(u *url.URL) error {
 	}
 	defer p.Close()
 
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithBlock())
+	if u.Query().Has("insecure") || insecureByDefault(u.Hostname()) {
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if insecureByDefault(u.Hostname()) {
+			q := u.Query()
+			q.Add("insecure", "")
+			u.RawQuery = q.Encode()
+		}
+	} else {
+		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
+	}
+
 	status := api.StatusConnectionConnecting
 	go StartRestServer(context.Background(), p, &status, u)
 
@@ -56,14 +69,6 @@ func StartClient(u *url.URL) error {
 
 	if u.Port() == "" {
 		u.Host += ":443"
-	}
-
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithBlock())
-	if u.Query().Has("insecure") || insecureByDefault(u.Hostname()) {
-		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	} else {
-		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
 	}
 
 	slog.Debug("connecting to remote", "host", u.Host, "insecure_explicit", u.Query().Has("insecure"), "insecure_ip", insecureByDefault(u.Hostname()))
@@ -265,9 +270,12 @@ func insecureByDefault(host string) bool {
 		return ip[0].IsLoopback() || ip[0].IsPrivate()
 	}
 
-	ip, err := net.ResolveIPAddr("ip", host)
+	ipaddr, err := net.ResolveIPAddr("ip", host)
+	slog.Debug("resolving host using system resolver", "ip", ipaddr.IP, "error", err)
+	ip := ipaddr.IP
 	if err != nil {
-		return false
+		ip = net.ParseIP(host)
+		slog.Debug("parsing as literal IP", "host", host, "ip", ip)
 	}
-	return ip.IP.IsLoopback()
+	return ip.IsLoopback() || ip.IsPrivate()
 }
