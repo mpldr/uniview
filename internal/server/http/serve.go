@@ -34,6 +34,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "/":
 		log.Debug("serving index")
 		s.templates[TemplateIndex].Execute(w, nil)
+	case "/healthcheck":
+		w.WriteHeader(http.StatusNoContent)
 	default:
 		data, err := templates.Templates.ReadFile(path.Join("dist", r.URL.Path))
 		if err == nil {
