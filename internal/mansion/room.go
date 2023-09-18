@@ -20,6 +20,8 @@ type room struct {
 	playbackStart  time.Time
 	playbackPos    time.Duration
 	playbackPaused bool
+
+	password string
 }
 
 func newRoom(ctx context.Context) *room {

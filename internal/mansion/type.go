@@ -87,11 +87,16 @@ func (m *Mansion) housekeeping() {
 	}
 }
 
-func (m *Mansion) GetRoom(name string) (*room, uint64) {
+func (m *Mansion) GetRoom(name string, password string) (*room, uint64) {
 	slog.Debug("requested room", "id", name)
 	m.roomsMtx.RLock()
 	if r, exists := m.rooms[name]; exists {
 		m.roomsMtx.RUnlock()
+
+		if r.password != "" && r.password != password {
+			return nil, 0
+		}
+
 		id := m.clientID.Add(1)
 		return r, id
 	}
@@ -100,6 +105,7 @@ func (m *Mansion) GetRoom(name string) (*room, uint64) {
 	m.roomsMtx.RUnlock()
 	m.roomsMtx.Lock()
 	r := newRoom(m.ctx)
+	r.password = password
 	m.rooms[name] = r
 	m.roomsMtx.Unlock()
 

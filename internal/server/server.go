@@ -36,7 +36,11 @@ func (s *Server) Room(feed protocol.UniView_RoomServer) error {
 		return status.Error(codes.Unavailable, "the server is shutting down")
 	}
 
-	room, id := s.Rooms.GetRoom(joinEv.Name)
+	room, id := s.Rooms.GetRoom(joinEv.Name, joinEv.Password)
+	if room == nil {
+		return status.Error(codes.PermissionDenied, "joining the room failed")
+	}
+
 	log = slog.With("grpc_client_id", id)
 	log.Debug("client connected")
 	room.Client(feed, id)

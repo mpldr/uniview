@@ -35,6 +35,7 @@ message RoomJoin {
 	string name = 1;
 	google.protobuf.Duration timestamp = 2;
 	string url = 3;
+	string password = 4;
 }
 
 message PlayPause {
