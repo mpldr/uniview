@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: © nobody
 # SPDX-License-Identifier: CC0-1.0
 
-FROM golang:alpine AS build
-RUN apk add make
-COPY . /src
+FROM archlinux AS build
+RUN pacman -Syu make go git protobuf which --noconfirm
+RUN git clone https://git.sr.ht/~mpldr/uniview /src
 WORKDIR /src
-RUN CGO_ENABLED=0 EXTRA_GO_LDFLAGS="-s -w" make univiewd
+RUN CGO_ENABLED=0 EXTRA_GO_LDFLAGS="-s -w" make
 
 FROM scratch
 COPY --from=build /src/univiewd /
-ENTRYPOINT /univiewd
+CMD ["/univiewd"]
