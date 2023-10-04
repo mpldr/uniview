@@ -28,6 +28,9 @@ var Server = struct {
 }
 
 var Client = struct {
+	General struct {
+		Player string `toml:"player"`
+	}
 	Media struct {
 		Directories []string `toml:"directories"`
 	} `toml:"media"`

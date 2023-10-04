@@ -18,7 +18,6 @@ import (
 
 	"git.sr.ht/~mpldr/uniview/internal/client/api"
 	"git.sr.ht/~mpldr/uniview/internal/player"
-	"git.sr.ht/~mpldr/uniview/internal/player/mpv"
 	"git.sr.ht/~mpldr/uniview/protocol"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -27,9 +26,6 @@ import (
 )
 
 func StartClient(u *url.URL) error {
-	var p player.Interface
-	var err error
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	waitForExit := make(chan struct{})
@@ -39,9 +35,9 @@ func StartClient(u *url.URL) error {
 	signal.Notify(sigs, os.Interrupt)
 
 	slog.Debug("starting player…")
-	p, err = mpv.New()
+	p, err := getPlayer()
 	if err != nil {
-		return fmt.Errorf("failed to start mpv: %w", err)
+		return fmt.Errorf("failed to start player: %w", err)
 	}
 	defer p.Close()
 

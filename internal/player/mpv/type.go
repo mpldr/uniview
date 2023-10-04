@@ -42,7 +42,7 @@ type MPV struct {
 	dropPause *atomic.Bool
 }
 
-func New() (*MPV, error) {
+func New() (player.Interface, error) {
 	runtimeDir := xdg.RuntimeDir
 	socketpath, err := os.MkdirTemp(runtimeDir, "uniview_")
 	if err != nil {
