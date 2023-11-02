@@ -50,6 +50,8 @@ func startServer() error {
 	roomMan := mansion.New()
 	shutdown = append(shutdown, roomMan.Close)
 
+	// TODO: use grpc.MaxConcurrentStreams to limit the number of
+	// concurrent connections as advised in GHSA-m425-mq94-257g
 	grpcsrv := grpc.NewServer()
 	protocol.RegisterUniViewServer(grpcsrv, &server.Server{
 		Rooms: roomMan,
