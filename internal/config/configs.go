@@ -16,6 +16,7 @@ var Server = struct {
 	} `toml:"general"`
 	Advanced struct {
 		EnableInstrumentation bool `toml:"enable-instrumentation"`
+		JSONLog               bool `toml:"json-log"`
 	} `toml:"advanced"`
 }{
 	General: struct {
@@ -24,17 +25,15 @@ var Server = struct {
 	}{
 		Bind: "127.1.2.4:1558",
 	},
-	Advanced: struct {
-		EnableInstrumentation bool `toml:"enable-instrumentation"`
-	}{
-		EnableInstrumentation: false,
-	},
 }
 
 var Client = struct {
 	Media struct {
 		Directories []string `toml:"directories"`
-	}
+	} `toml:"media"`
+	Advanced struct {
+		JSONLog bool `toml:"json-log"`
+	} `toml:"advanced"`
 }{
 	Media: struct {
 		Directories []string `toml:"directories"`

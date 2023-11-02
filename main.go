@@ -37,12 +37,19 @@ func main() {
 	})))
 
 	if filepath.Base(os.Args[0]) == "univiewd" {
-		slog.Debug("starting in server mode")
-
 		err := config.Load(&config.Server, config.ServerPaths)
 		if err != nil {
 			slog.Warn("no config loaded", "error", err)
 		}
+
+		if config.Server.Advanced.JSONLog {
+			slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+				AddSource: loglevel == "debug",
+				Level:     levels[loglevel],
+			})))
+		}
+
+		slog.Debug("starting in server mode")
 
 		err = startServer()
 		if err != nil {
@@ -80,6 +87,13 @@ func main() {
 		err := config.Load(&config.Client, config.ClientPaths)
 		if err != nil {
 			slog.Warn("no config loaded", "error", err)
+		}
+
+		if config.Client.Advanced.JSONLog {
+			slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+				AddSource: loglevel == "debug",
+				Level:     levels[loglevel],
+			})))
 		}
 
 		slog.Info("starting uniview", "version", buildinfo.VersionString())
