@@ -17,6 +17,7 @@ sources:
 secrets:
   - ba45943f-f792-4287-87a5-09fdb803a8dd # GitHub SSH Key
   - fb78c647-e9f5-4922-b804-7c795da4d56a # GitHub known_hosts
+  - 620e79ed-2089-4231-ba88-42a5bb352973 # Container push key
 tasks:
   - prepare: |
       sudo usermod -aG docker $(whoami)
@@ -45,9 +46,21 @@ tasks:
         echo -e "\n\nAUTHORS file is not up to date!"
         exit 1
       fi
+  - stop-unless-push: |
+      if [ "$BUILD_SUBMITTER" != "git.sr.ht" ]; then complete-build; fi
   - mirror-to-github: |
-      cd uniview
-      [ $(git describe HEAD) == $(git describe origin/master) ] || exit 255
       git clone --mirror https://git.sr.ht/~mpldr/uniview
       cd uniview.git
       git push --mirror git@github.com:mpldr/uniview.git
+  - update-container: |
+      cd ~/uniview
+      if git describe --exact-match HEAD; then
+        docker build -t "c8n.io/mpldr/uniview:$(git describe --exact-match HEAD)" -t "c8n.io/mpldr/uniview:latest" -t "c8n.io/mpldr/uniview:devel" .
+        docker push "c8n.io/mpldr/uniview:$(git describe --exact-match HEAD)"
+        docker push "c8n.io/mpldr/uniview:latest"
+        docker push "c8n.io/mpldr/uniview:devel"
+      else
+        docker build -t "c8n.io/mpldr/uniview:$(git describe HEAD)" -t "c8n.io/mpldr/uniview:devel" .
+        docker push "c8n.io/mpldr/uniview:$(git describe --always HEAD)"
+        docker push "c8n.io/mpldr/uniview:devel"
+      fi
