@@ -30,9 +30,6 @@ tasks:
         sleep 1
       done
       set -e
-  - build: |
-      cd uniview
-      make
   - docker-build: |
       cd uniview
       docker build .
