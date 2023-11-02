@@ -49,7 +49,7 @@ func main() {
 			})))
 		}
 
-		slog.Debug("starting in server mode")
+		slog.Debug("starting in server mode", "loaded_config", config.Server)
 
 		err = startServer()
 		if err != nil {
