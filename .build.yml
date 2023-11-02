@@ -32,6 +32,7 @@ tasks:
       set -e
   - docker-build: |
       cd uniview
+      touch internal/client/index.html
       docker build .
   - reuse-compliance: |
       cd uniview

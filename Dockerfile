@@ -3,7 +3,7 @@
 
 FROM archlinux AS build
 RUN pacman -Syu make go git protobuf which --noconfirm
-RUN git clone https://git.sr.ht/~mpldr/uniview /src
+COPY . /src
 WORKDIR /src
 RUN CGO_ENABLED=0 EXTRA_GO_LDFLAGS="-s -w" make
 
