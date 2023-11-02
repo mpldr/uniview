@@ -23,7 +23,7 @@ var Server = struct {
 		Bind string `toml:"bind-to"`
 		Host string `toml:"host"`
 	}{
-		Bind: "127.1.2.4:1558",
+		Bind: "0.0.0.0:1558",
 	},
 }
 
