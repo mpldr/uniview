@@ -140,6 +140,42 @@ function playFile(root, path) {
 		})
 }
 
+function isValidUrl(string) {
+	try {
+		new URL(string);
+		return true;
+	} catch (err) {
+		return false;
+	}
+}
+
+function playURL(url) {
+	fetch('http://localhost:21558/player/start',
+		{
+			method: "POST",
+			body: JSON.stringify("https://www.youtube.com/watch?v=rQlMtztiAoA"),
+			headers: {
+				"Content-type": "application/json; charset=UTF-8"
+			}
+		}	).then(r => {
+			console.log(r);
+		})
+		.catch((error)=>{
+			console.log(error);
+		})
+}
+
+function submitURL() {
+	let url = document.getElementById("url").value;
+
+	if (!isValidUrl(url)){
+		// rule of thumb for URLs: if it has a :, it is a URL
+		url = "http://"+url;
+	}
+
+	playURL(url);
+}
+
 function showConnected() {
 	document.getElementById("connected").classList.add("show");
 	setTimeout(function(){document.getElementById("connected").classList.remove("show")},3000);
@@ -175,6 +211,8 @@ function checkServer() {
 function lock() {
 	document.getElementById("videoSelect").disabled = true;
 	document.getElementById("rootSelect").disabled = true;
+	document.getElementById("url").disabled = true;
+	document.getElementById("urlSubmit").disabled = true;
 	document.getElementById("listloader").classList.add("hide");
 	document.getElementById("filelist").classList.add("hide");
 	document.getElementById("selectError").classList.remove("hide");
@@ -183,6 +221,8 @@ function lock() {
 function unlock() {
 	document.getElementById("videoSelect").disabled = false;
 	document.getElementById("rootSelect").disabled = false;
+	document.getElementById("url").disabled = false;
+	document.getElementById("urlSubmit").disabled = false;
 	document.getElementById("selectError").classList.add("hide");
 	document.getElementById("fileTree").close();
 }
