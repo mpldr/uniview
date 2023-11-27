@@ -393,6 +393,15 @@ const (
 	StatusConnectionDisconnected StatusConnection = "disconnected"
 )
 
+// AllValues returns all StatusConnection values.
+func (StatusConnection) AllValues() []StatusConnection {
+	return []StatusConnection{
+		StatusConnectionOk,
+		StatusConnectionConnecting,
+		StatusConnectionDisconnected,
+	}
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (s StatusConnection) MarshalText() ([]byte, error) {
 	switch s {

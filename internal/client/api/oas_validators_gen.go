@@ -9,6 +9,10 @@ import (
 )
 
 func (s *Directory) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if s.Content == nil {
@@ -44,6 +48,10 @@ func (s *GetStatusServiceUnavailable) Validate() error {
 }
 
 func (s *Pause) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if value, ok := s.PausedMinusAt.Get(); ok {
@@ -101,6 +109,10 @@ func (s PlayerStartPostReq) Validate() error {
 }
 
 func (s *Status) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := s.Connection.Validate(); err != nil {
@@ -144,6 +156,10 @@ func (s StatusConnection) Validate() error {
 }
 
 func (s *Version) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.Int{
@@ -212,6 +228,10 @@ func (s *Version) Validate() error {
 }
 
 func (s *VideoFile) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.Int{

@@ -12,11 +12,11 @@ import (
 )
 
 func encodeFilesGetResponse(response []string, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
-	e := jx.GetEncoder()
+	e := new(jx.Encoder)
 	e.ArrStart()
 	for _, elem := range response {
 		e.Str(elem)
@@ -25,21 +25,23 @@ func encodeFilesGetResponse(response []string, w http.ResponseWriter, span trace
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
 func encodeGetFilesRootRelpathResponse(response GetFilesRootRelpathRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *Directory:
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
 
-		e := jx.GetEncoder()
+		e := new(jx.Encoder)
 		response.Encode(e)
 		if _, err := e.WriteTo(w); err != nil {
 			return errors.Wrap(err, "write")
 		}
+
 		return nil
 
 	case *GetFilesRootRelpathNotFound:
@@ -54,55 +56,59 @@ func encodeGetFilesRootRelpathResponse(response GetFilesRootRelpathRes, w http.R
 }
 
 func encodeGetPlayerPauseResponse(response *Pause, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
-	e := jx.GetEncoder()
+	e := new(jx.Encoder)
 	response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
 func encodeGetPlayerPositionResponse(response PlaybackPosition, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
 
-	e := jx.GetEncoder()
+	e := new(jx.Encoder)
 	response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
 	return nil
 }
 
 func encodeGetStatusResponse(response GetStatusRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *GetStatusOK:
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
 
-		e := jx.GetEncoder()
+		e := new(jx.Encoder)
 		response.Encode(e)
 		if _, err := e.WriteTo(w); err != nil {
 			return errors.Wrap(err, "write")
 		}
+
 		return nil
 
 	case *GetStatusServiceUnavailable:
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(503)
 		span.SetStatus(codes.Error, http.StatusText(503))
 
-		e := jx.GetEncoder()
+		e := new(jx.Encoder)
 		response.Encode(e)
 		if _, err := e.WriteTo(w); err != nil {
 			return errors.Wrap(err, "write")
 		}
+
 		return nil
 
 	default:

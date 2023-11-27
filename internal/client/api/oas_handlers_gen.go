@@ -7,12 +7,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-faster/errors"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
 	semconv "go.opentelemetry.io/otel/semconv/v1.19.0"
 	"go.opentelemetry.io/otel/trace"
 
+	ht "github.com/ogen-go/ogen/http"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/otelogen"
@@ -24,10 +26,14 @@ import (
 //
 // GET /files
 func (s *Server) handleFilesGetRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	var otelAttrs []attribute.KeyValue
+	otelAttrs := []attribute.KeyValue{
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/files"),
+	}
 
 	// Start a span for this request.
 	ctx, span := s.cfg.Tracer.Start(r.Context(), "FilesGet",
+		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
 	defer span.End()
@@ -55,12 +61,13 @@ func (s *Server) handleFilesGetRequest(args [0]string, argsEscaped bool, w http.
 	var response []string
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "FilesGet",
-			OperationID:   "",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "FilesGet",
+			OperationSummary: "list file roots",
+			OperationID:      "",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -92,7 +99,9 @@ func (s *Server) handleFilesGetRequest(args [0]string, argsEscaped bool, w http.
 
 	if err := encodeFilesGetResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -153,10 +162,11 @@ func (s *Server) handleGetFilesRootRelpathRequest(args [1]string, argsEscaped bo
 	var response GetFilesRootRelpathRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetFilesRootRelpath",
-			OperationID:   "get-files-root-relpath",
-			Body:          nil,
+			Context:          ctx,
+			OperationName:    "GetFilesRootRelpath",
+			OperationSummary: "list files under the given root",
+			OperationID:      "get-files-root-relpath",
+			Body:             nil,
 			Params: middleware.Parameters{
 				{
 					Name: "relpath",
@@ -199,7 +209,9 @@ func (s *Server) handleGetFilesRootRelpathRequest(args [1]string, argsEscaped bo
 
 	if err := encodeGetFilesRootRelpathResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -247,12 +259,13 @@ func (s *Server) handleGetPlayerPauseRequest(args [0]string, argsEscaped bool, w
 	var response *Pause
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetPlayerPause",
-			OperationID:   "get-player-pause",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetPlayerPause",
+			OperationSummary: "retrieve pause state",
+			OperationID:      "get-player-pause",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -284,7 +297,9 @@ func (s *Server) handleGetPlayerPauseRequest(args [0]string, argsEscaped bool, w
 
 	if err := encodeGetPlayerPauseResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -331,12 +346,13 @@ func (s *Server) handleGetPlayerPositionRequest(args [0]string, argsEscaped bool
 	var response PlaybackPosition
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetPlayerPosition",
-			OperationID:   "get-player-position",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetPlayerPosition",
+			OperationSummary: "retrieve current position",
+			OperationID:      "get-player-position",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -368,7 +384,9 @@ func (s *Server) handleGetPlayerPositionRequest(args [0]string, argsEscaped bool
 
 	if err := encodeGetPlayerPositionResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -415,12 +433,13 @@ func (s *Server) handleGetStatusRequest(args [0]string, argsEscaped bool, w http
 	var response GetStatusRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "GetStatus",
-			OperationID:   "get-status",
-			Body:          nil,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "GetStatus",
+			OperationSummary: "Query system status",
+			OperationID:      "get-status",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -452,7 +471,9 @@ func (s *Server) handleGetStatusRequest(args [0]string, argsEscaped bool, w http
 
 	if err := encodeGetStatusResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -463,10 +484,14 @@ func (s *Server) handleGetStatusRequest(args [0]string, argsEscaped bool, w http
 //
 // POST /player/start
 func (s *Server) handlePlayerStartPostRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	var otelAttrs []attribute.KeyValue
+	otelAttrs := []attribute.KeyValue{
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/player/start"),
+	}
 
 	// Start a span for this request.
 	ctx, span := s.cfg.Tracer.Start(r.Context(), "PlayerStartPost",
+		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
 	defer span.End()
@@ -513,12 +538,13 @@ func (s *Server) handlePlayerStartPostRequest(args [0]string, argsEscaped bool, 
 	var response PlayerStartPostRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "PlayerStartPost",
-			OperationID:   "",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "PlayerStartPost",
+			OperationSummary: "start playback of a video",
+			OperationID:      "",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -550,7 +576,9 @@ func (s *Server) handlePlayerStartPostRequest(args [0]string, argsEscaped bool, 
 
 	if err := encodePlayerStartPostResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -616,12 +644,13 @@ func (s *Server) handlePutPlayerPauseRequest(args [0]string, argsEscaped bool, w
 	var response *PutPlayerPauseAccepted
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "PutPlayerPause",
-			OperationID:   "put-player-pause",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "PutPlayerPause",
+			OperationSummary: "set player pause state",
+			OperationID:      "put-player-pause",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -653,7 +682,9 @@ func (s *Server) handlePutPlayerPauseRequest(args [0]string, argsEscaped bool, w
 
 	if err := encodePutPlayerPauseResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }
@@ -719,12 +750,13 @@ func (s *Server) handlePutPlayerPositionRequest(args [0]string, argsEscaped bool
 	var response *PutPlayerPositionAccepted
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
-			Context:       ctx,
-			OperationName: "PutPlayerPosition",
-			OperationID:   "put-player-position",
-			Body:          request,
-			Params:        middleware.Parameters{},
-			Raw:           r,
+			Context:          ctx,
+			OperationName:    "PutPlayerPosition",
+			OperationSummary: "seek to position",
+			OperationID:      "put-player-position",
+			Body:             request,
+			Params:           middleware.Parameters{},
+			Raw:              r,
 		}
 
 		type (
@@ -756,7 +788,9 @@ func (s *Server) handlePutPlayerPositionRequest(args [0]string, argsEscaped bool
 
 	if err := encodePutPlayerPositionResponse(response, w, span); err != nil {
 		recordError("EncodeResponse", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
 		return
 	}
 }

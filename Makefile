@@ -52,7 +52,7 @@ protocol/uniview_grpc.pb.go: protocol/uniview.proto tools/protoc-gen-go-grpc
 
 internal/client/api/: client-api-spec.json go.mod
 	@-mkdir -p $@
-	$(GO) run github.com/ogen-go/ogen/cmd/ogen --target internal/client/api/ --clean --no-client $<
+	$(GO) run github.com/ogen-go/ogen/cmd/ogen --target internal/client/api/ --clean $<
 	touch $@
 
 internal/client/index.html: client-api-spec.json
